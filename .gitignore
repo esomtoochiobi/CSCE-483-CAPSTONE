@@ -2,5 +2,5 @@
 .env
 
 # Ensure venv and cache aren't added to git
-/backend/.venv/*
-/backend/__pycache__/*
+/backend/src/.venv/*
+/backend/src/__pycache__/*
