@@ -1,9 +1,7 @@
 ## CSCE 483 - WaCo Backend
-1. Enable virtual environment 
-   > python3 -m venv .venv
-2. Activate virtul environment
-    > . .venv/bin/activate
-3. Install requirements
-    > pip install -r requirements.txt
-4. Run Flask app
-    > flask run
+1. Install pipenv 
+   > pip install pipenv --user 
+2. Install requirements
+    > pipenv install
+3. Run Flask app
+    > pipenv run flask run
