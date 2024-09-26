@@ -1,0 +1,6 @@
+# Environment variables
+.env
+
+# Ensure venv and cache aren't added to git
+/backend/.venv/*
+/backend/__pycache__/*
