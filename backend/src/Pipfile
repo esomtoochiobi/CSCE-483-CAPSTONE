@@ -16,6 +16,7 @@ zipp = "*"
 mysql-connector-python = "*"
 python-dotenv = "*"
 pymysql = "*"
+flask-login = "*"
 
 [dev-packages]
 
