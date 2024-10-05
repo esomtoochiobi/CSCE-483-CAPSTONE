@@ -1,6 +1,7 @@
-import os
 from dotenv import load_dotenv
 from user import User
+
+import os
 import pymysql.cursors
 
 load_dotenv()

@@ -1,8 +1,8 @@
+from db import create_user, get_user_by_id, get_user_by_email
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
 from user import User
-from db import create_user, get_user_by_id, get_user_by_email
 
 import os
 import flask_login
@@ -27,7 +27,7 @@ def load_user(user_id):
 # Routes
 @app.route('/')
 def howdy_world():
-    return '<h1>Howdy, world!</h1>'
+    return render_template('index.html')
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -39,11 +39,11 @@ def register():
         password = request.form.get('password')
 
         if get_user_by_email(email) != None:
-            return 'User exists'
+            return 'That email is already in use.'
 
         create_user(email, bcrypt.generate_password_hash(password))
     
-        return 'REGISTERED!'
+        return 'You are registered!'
     
     return 'Please register here.'
 
@@ -60,7 +60,8 @@ def login():
 
         if bcrypt.check_password_hash(user.password, password):
             flask_login.login_user(user)
-            return 'Welcome!'
+            return redirect(url_for('profile'))
+
         return 'Invalid login!'
     
     return 'Please log in here.'  
@@ -69,7 +70,7 @@ def login():
 @flask_login.login_required
 def logout():
     flask_login.logout_user()
-    flash('You are logged out', 'success')
+    flash('You are logged out.', 'success')
     return redirect(url_for('login'))
 
 @app.route('/profile')
