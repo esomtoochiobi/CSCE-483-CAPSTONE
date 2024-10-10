@@ -43,9 +43,9 @@ def register():
 
         create_user(email, bcrypt.generate_password_hash(password))
     
-        return 'You are registered!'
+        return redirect(url_for('login'))
     
-    return 'Please register here.'
+    return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -60,11 +60,11 @@ def login():
 
         if bcrypt.check_password_hash(user.password, password):
             flask_login.login_user(user)
-            return redirect(url_for('profile'))
+            return redirect(url_for('profile'), code=303)
 
         return 'Invalid login!'
     
-    return 'Please log in here.'  
+    return render_template('login.html')  
 
 @app.route('/logout')
 @flask_login.login_required
