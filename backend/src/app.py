@@ -26,7 +26,7 @@ def load_user(user_id):
 
 # Routes
 @app.route('/')
-def howdy_world():
+def index():
     return render_template('index.html')
 
 @app.route('/register', methods=['GET','POST'])
@@ -82,3 +82,7 @@ def logout():
 @flask_login.login_required
 def profile():
     return f'Howdy, {flask_login.current_user.email}'
+
+@app.errorhandler(401)
+def page_not_found(e):
+    return render_template('error.html')
