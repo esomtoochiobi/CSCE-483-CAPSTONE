@@ -31,6 +31,8 @@ def howdy_world():
 
 @app.route('/register', methods=['GET','POST'])
 def register():
+    error = None
+
     if flask_login.current_user.is_authenticated:
         return 'You are already registered.'
 
@@ -60,7 +62,7 @@ def login():
 
         user = get_user_by_email(email)
 
-        if bcrypt.check_password_hash(user.password, password):
+        if user and bcrypt.check_password_hash(user.password, password):
             flask_login.login_user(user)
             flash('You are logged in.')
             return redirect(url_for('profile'), code=303)
