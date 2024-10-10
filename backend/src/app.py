@@ -39,16 +39,18 @@ def register():
         password = request.form.get('password')
 
         if get_user_by_email(email) != None:
-            return 'That email is already in use.'
-
-        create_user(email, bcrypt.generate_password_hash(password))
+            error = 'That email is already in use.'
+        else:
+            create_user(email, bcrypt.generate_password_hash(password))
+            flash('You are registered.')
+            return redirect(url_for('login'))
     
-        return redirect(url_for('login'))
-    
-    return render_template('register.html')
+    return render_template('register.html', error=error)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None
+
     if flask_login.current_user.is_authenticated:
         return 'You are already logged in.'
 
@@ -60,11 +62,12 @@ def login():
 
         if bcrypt.check_password_hash(user.password, password):
             flask_login.login_user(user)
+            flash('You are logged in.')
             return redirect(url_for('profile'), code=303)
-
-        return 'Invalid login!'
+        else:
+            error = 'Invalid login!'
     
-    return render_template('login.html')  
+    return render_template('login.html', error=error)  
 
 @app.route('/logout')
 @flask_login.login_required
