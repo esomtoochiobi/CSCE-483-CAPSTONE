@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+  {% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}
+  {% endif %}
+  <form action="" method="post">
+    <label for="email">Enter email: </label>
+    <input type="text" name="email" type="email">
+    <label for="password">Enter password: </label>
+    <input type="text" name="password" type="password">
+    <button type="submit">Submit</button>
+  </form>    
+{% endblock %}
