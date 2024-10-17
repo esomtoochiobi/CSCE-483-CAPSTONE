@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
 from user import User
+from board import Board
+import threading
 
 import os
 import flask_login
@@ -18,6 +20,7 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
 bcrypt = Bcrypt(app)
+app.board = Board()
 
 # Set up way to load users into a session
 @login_manager.user_loader
@@ -27,6 +30,7 @@ def load_user(user_id):
 # Routes
 @app.route('/')
 def index():
+    print(app.board.read('soilMoisture'))
     return render_template('index.html')
 
 @app.route('/register', methods=['GET','POST'])
@@ -81,8 +85,14 @@ def logout():
 @app.route('/profile')
 @flask_login.login_required
 def profile():
-    return f'Howdy, {flask_login.current_user.email}'
+    return render_template('profile.html', user=flask_login.current_user)
 
+# Unauthorized error handling
 @app.errorhandler(401)
 def page_not_found(e):
     return render_template('error.html')
+
+if __name__ == '__main__':
+    app.board.start()
+    app.run()
+    print(1)
