@@ -1,9 +1,8 @@
-from db import create_user, get_user_by_id, get_user_by_email
+from db import create_user, get_user_by_id, get_user_by_email, get_devices_by_user
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
 from user import User
-from board import Board
 import threading
 
 import os
@@ -20,17 +19,18 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
 bcrypt = Bcrypt(app)
-app.board = Board()
 
 # Set up way to load users into a session
 @login_manager.user_loader
 def load_user(user_id):
-    return get_user_by_id(user_id)
+    user = get_user_by_id(user_id)
+    user.devices = get_devices_by_user(user_id)
+    return user
 
 # Routes
 @app.route('/')
 def index():
-    print(app.board.read('soilMoisture'))
+    get_devices_by_user(flask_login.current_user.id)
     return render_template('index.html')
 
 @app.route('/register', methods=['GET','POST'])
@@ -85,14 +85,11 @@ def logout():
 @app.route('/profile')
 @flask_login.login_required
 def profile():
+    for i in range(len(flask_login.current_user.devices)):
+        flask_login.current_user.devices[i].client.start()
     return render_template('profile.html', user=flask_login.current_user)
 
 # Unauthorized error handling
 @app.errorhandler(401)
 def page_not_found(e):
     return render_template('error.html')
-
-if __name__ == '__main__':
-    app.board.start()
-    app.run()
-    print(1)

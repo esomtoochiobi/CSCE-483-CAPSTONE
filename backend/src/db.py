@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from user import User
+from devices import Hub, Sensor
 
 import os
 import pymysql.cursors
@@ -30,7 +31,7 @@ def create_user(email: str, password: str):
         cnx.commit()
 
 # Define method to get user by email from database
-def get_user_by_email(email: str):
+def get_user_by_email(email: str) -> User:
     with get_connection().cursor() as cursor:
         sql = "SELECT * FROM `users` WHERE `email` = %s"
         cursor.execute(sql, (email))
@@ -44,3 +45,23 @@ def get_user_by_id(user_id: str) -> User:
         cursor.execute(sql, args={'id': int(user_id)})
 
         return None if (user := cursor.fetchone()) == None else User(user[0], user[1], user[2])
+
+# Define method to get devices by user_id from database
+def get_devices_by_user(user_id: str): 
+    with get_connection().cursor() as cursor:
+        sql = "SELECT * FROM `devices` WHERE `user_id` = %(id)s"
+        cursor.execute(sql, args={'id': int(user_id)})
+
+        devices = []
+
+        for device in cursor:
+            if device[4] == 0:      # Sensor
+                devices.append(Sensor(device[0], device[2], device[3], device[4], device[5], device[5]))
+            else:                   # Hub
+                devices.append(Hub(device[0], device[2], device[3], device[4], device[7], device[8]))
+
+
+        print(f'{len(devices)} devices found')
+        return devices
+
+        
