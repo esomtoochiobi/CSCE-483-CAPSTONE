@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="{{ url_for('index') }}">Landing</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a href="{{ url_for('profile') }}">Profile</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class=flashes>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        
+        <div>
+            <h2>Howdy, {{ user.email }}</h2>
+        </div>
+
+        <div class="devices">
+            <h3>Devices</h3>
+            <ul>
+                {% for device in user.devices %}
+                <li>
+                    {% if device.device_type == 0 %}
+                        Sensor_{{device.id}}
+                    {% else %}
+                        Hub_{{device.id}}
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+</body>
+
+</html>

@@ -59,4 +59,6 @@ class Hub(Device):
 
     def read(self, key):
         self.client.update()
-        return self.client[key]
+        return self.client.get(key)
+
+    
