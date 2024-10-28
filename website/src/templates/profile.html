@@ -5,49 +5,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
 </head>
 
 <body>
     <nav class="navbar">
-        <ul>
-            <li><a href="{{ url_for('index') }}">Landing</a></li>
-            <li><a href="{{ url_for('login') }}">Login</a></li>
-            <li><a href="{{ url_for('register') }}">Register</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li><a href="{{ url_for('profile') }}">Profile</a></li>
-        </ul>
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('index') }}">Landing</a>
+                <a class="navbar-item" href="{{ url_for('login') }}">Login</a>
+                <a class="navbar-item" href="{{ url_for('register') }}">Register</a>
+            </div>
+
+            <div class="navbar-end">
+                <a class="navbar-item" href="{{ url_for('logout') }}">Logout</a>
+                <a class="navbar-item" href="{{ url_for('profile') }}">Profile</a>
+            </div>
+        <div>
     </nav>
-    <div class="content">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <ul class=flashes>
+            <section class="section">
             {% for message in messages %}
-            <li>{{ message }}</li>
+                <div class="notification is-primary">
+                    {{ message }}
+                </div>
             {% endfor %}
-        </ul>
+            </section>
         {% endif %}
         {% endwith %}
-        
-        <div>
-            <h2>Howdy, {{ user.email }}</h2>
-        </div>
+    <section class="section">
+        <h1 class="title">Profile</h1>
+        <h2 class="subtitle">Howdy, {{ user.email }}</h2>
 
-        <div class="devices">
-            <h3>Devices</h3>
-            <ul>
-                {% for device in user.devices %}
-                <li>
-                    {% if device.device_type == 0 %}
+        <div class="container">
+            <h3 class="subtitle"><strong>Devices</strong></h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Device Name</th>
+                        <th>Reading</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                </tfoot>
+                <tbody>
+                    {% for device in user.devices %}
+                    <td>
+                        {% if device.device_type == 0 %}
                         Sensor_{{device.id}}
-                    {% else %}
+                        {% else %}
                         Hub_{{device.id}}
-                    {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if device.device_type == 0 %}
+                        {{device.client['soilMoisture']}}
+                        {% else %}
+                        {{device.water_flow}}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-
-    </div>
+    </section>
+    <section class="section">
+        <div class="container">
+            <h3 class="subtitle"><strong>Add a Device</strong></h3>
+            <form action="" method="post">
+                <div class="field">
+                    <label class="label" for="device_key">Device Key</label>
+                    <div class="control">
+                        <input class="input" name="device_key" type="text" placeholder="Enter device key...">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label" for="device_id">Device ID</label>
+                    <div class="control">
+                        <input class="input" name="device_id" type="text" placeholder="Enter device ID...">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Device Type</label>
+                    <div class="control">
+                        <div class="select">
+                            <select>
+                                <option value="0">Sensor</option>
+                                <option value="1">Hub</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="button is-success" type="submit">Submit</button>
+            </form>
+        </div>
+    </section>
 </body>
 
 </html>

@@ -30,35 +30,32 @@ def load_user(user_id):
 # Routes
 @app.route('/')
 def index():
-    get_devices_by_user(flask_login.current_user.id)
     return render_template('index.html')
 
 @app.route('/register', methods=['GET','POST'])
 def register():
-    error = None
-
     if flask_login.current_user.is_authenticated:
-        return 'You are already registered.'
+        return render_template('error_loggedin.html') 
 
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
 
         if get_user_by_email(email) != None:
-            error = 'That email is already in use.'
+            flash('That email is already in use.')
         else:
             create_user(email, bcrypt.generate_password_hash(password))
             flash('You are registered.')
             return redirect(url_for('login'))
     
-    return render_template('register.html', error=error)
+    return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
 
     if flask_login.current_user.is_authenticated:
-        return 'You are already logged in.'
+        return render_template('error_loggedin.html')
 
     if request.method == 'POST':
         email = request.form.get('email')
@@ -71,9 +68,9 @@ def login():
             flash('You are logged in.')
             return redirect(url_for('profile'), code=303)
         else:
-            error = 'Invalid login!'
+            flash('Invalid login credentials.')
     
-    return render_template('login.html', error=error)  
+    return render_template('login.html')  
 
 @app.route('/logout')
 @flask_login.login_required

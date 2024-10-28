@@ -4,28 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} {% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
 </head>
 <body>
     <nav class="navbar">
-        <ul>
-            <li><a href="{{ url_for('index') }}">Landing</a></li>
-            <li><a href="{{ url_for('login') }}">Login</a></li>
-            <li><a href="{{ url_for('register') }}">Register</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li><a href="{{ url_for('profile') }}">Profile</a></li>
-        </ul>
+        <div class="navbar-menu">
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="{{ url_for('index') }}">Landing</a>
+                    <a class="navbar-item" href="{{ url_for('login') }}">Login</a>
+                    <a class="navbar-item" href="{{ url_for('register') }}">Register</a>
+                </div>
+            
+                <div class="navbar-end">
+                    <a class="navbar-item" href="{{ url_for('logout') }}">Logout</a>
+                    <a class="navbar-item" href="{{ url_for('profile') }}">Profile</a>
+                </div>
+                <div>
+        <div>
     </nav>
-    <div class="content">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <ul class=flashes>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
+        <section class="section">
+        {% for message in messages %}
+        <div class="notification is-danger">
+            {{ message }}
+        </div>
+        {% endfor %}
+        </section>
         {% endif %}
         {% endwith %}
+    <section class="section">
         {% block content %} {% endblock %}
-    </div>
+    </section>
 </body>
 </html>
