@@ -1,4 +1,5 @@
 from arduino_iot_cloud import ArduinoCloudClient
+from db import update_soil_moisture
 
 import os
 import time
@@ -16,7 +17,8 @@ def logging_func(_id, device_type):
     )   
 
 def on_moist_change(client, value):
-    client["soilMoisture"] = value
+    client["moistureLevel"] = value
+    update_soil_moisture(client._sqlid, str(value))
 
 class Device():
     def __init__(self, _id: int, device_key: str, device_id: str, device_type: int):
@@ -27,15 +29,15 @@ class Device():
         self.device_type = device_type
 
 class Sensor(Device):
-    def __init__(self, _id: int, device_key:  str, device_id: str, device_type: int, moisture: int, threshold: int):
+    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, moisture: int, threshold: int):
         super().__init__(_id, device_key, device_id, device_type)
         self.threshold = threshold
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
         logging_func(self.id, self.device_type)
 
-        self.client.register('soilMoisture', on_write=on_moist_change)
-        self.client['soilMoisture'] = moisture
+        self.client._sqlid = _id
+        self.client.register('moistureLevel', on_write=on_moist_change, value=None)
 
     def start(self):
         self.client.start()

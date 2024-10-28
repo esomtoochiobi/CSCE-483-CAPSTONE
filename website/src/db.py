@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 from user import User
-from devices import Hub, Sensor
 
 import os
 import pymysql.cursors
@@ -46,8 +45,18 @@ def get_user_by_id(user_id: str) -> User:
 
         return None if (user := cursor.fetchone()) == None else User(user[0], user[1], user[2])
 
+# Define method to add device to database
+def create_device(user_id: str, device_key: str, device_id: str, device_type: str):
+    with get_connection() as cnx:
+        with cnx.cursor() as cursor:
+            sql = "INSERT INTO `devices` (`user_id`, `device_key`, `device_id`, `device_type`) VALUES (%(ui)s, %(dk)s, %(di)s, %(dt)s)"
+            cursor.execute(sql, args={'ui': int(user_id), 'dk': device_key, 'di': device_id, 'dt': int(device_type)})
+        
+        cnx.commit()
+
 # Define method to get devices by user_id from database
 def get_devices_by_user(user_id: str): 
+    from devices import Hub, Sensor
     with get_connection().cursor() as cursor:
         sql = "SELECT * FROM `devices` WHERE `user_id` = %(id)s"
         cursor.execute(sql, args={'id': int(user_id)})
@@ -64,4 +73,11 @@ def get_devices_by_user(user_id: str):
         print(f'{len(devices)} devices found')
         return devices
 
+def update_soil_moisture(device_id: str, moisture: str):
+    with get_connection() as cnx:
+        with cnx.cursor() as cursor:
+            sql = "UPDATE `devices` SET moisture = %(m)s WHERE `id` = %(id)s"
+            cursor.execute(sql, args={'id': device_id, 'm': moisture})
+
+        cnx.commit()
         

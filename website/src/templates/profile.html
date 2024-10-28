@@ -51,6 +51,7 @@
                 </tfoot>
                 <tbody>
                     {% for device in user.devices %}
+                    <tr>
                     <td>
                         {% if device.device_type == 0 %}
                         Sensor_{{device.id}}
@@ -60,11 +61,12 @@
                     </td>
                     <td>
                         {% if device.device_type == 0 %}
-                        {{device.client['soilMoisture']}}
+                        {{device.read('moistureLevel')}}
                         {% else %}
                         {{device.water_flow}}
                         {% endif %}
                     </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -90,7 +92,7 @@
                     <label class="label">Device Type</label>
                     <div class="control">
                         <div class="select">
-                            <select>
+                            <select name="device_type">
                                 <option value="0">Sensor</option>
                                 <option value="1">Hub</option>
                             </select>

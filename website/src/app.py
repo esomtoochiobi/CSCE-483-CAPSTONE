@@ -1,4 +1,4 @@
-from db import create_user, get_user_by_id, get_user_by_email, get_devices_by_user
+from db import create_device, create_user, get_user_by_id, get_user_by_email, get_devices_by_user
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
@@ -52,8 +52,6 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
-
     if flask_login.current_user.is_authenticated:
         return render_template('error_loggedin.html')
 
@@ -79,11 +77,20 @@ def logout():
     flash('You are logged out.', 'success')
     return redirect(url_for('login'))
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @flask_login.login_required
 def profile():
+    if request.method == 'POST':
+        device_key = request.form.get('device_key')
+        device_id = request.form.get('device_id')
+        device_type = request.form.get('device_type')
+
+        create_device(flask_login.current_user.id, device_key, device_id, device_type)
+        return redirect(url_for('profile')) 
+
     for i in range(len(flask_login.current_user.devices)):
         flask_login.current_user.devices[i].client.start()
+
     return render_template('profile.html', user=flask_login.current_user)
 
 # Unauthorized error handling
