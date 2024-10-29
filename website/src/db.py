@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
-from user import User
+from entities.user import User
+from entities.reading import Reading
 
 import os
 import pymysql.cursors
@@ -56,7 +57,7 @@ def create_device(user_id: str, device_key: str, device_id: str, device_type: st
 
 # Define method to get devices by user_id from database
 def get_devices_by_user(user_id: str): 
-    from devices import Hub, Sensor
+    from entities.devices import Hub, Sensor
     with get_connection().cursor() as cursor:
         sql = "SELECT * FROM `devices` WHERE `user_id` = %(id)s"
         cursor.execute(sql, args={'id': int(user_id)})
@@ -65,19 +66,25 @@ def get_devices_by_user(user_id: str):
 
         for device in cursor:
             if device[4] == 0:      # Sensor
-                devices.append(Sensor(device[0], device[2], device[3], device[4], device[5], device[6], device[8]))
+                devices.append(Sensor(device[0], device[2], device[3], device[4]))
             else:                   # Hub
-                devices.append(Hub(device[0], device[2], device[3], device[4], device[7]))
+                devices.append(Hub(device[0], device[2], device[3], device[4]))
 
 
         print(f'{len(devices)} devices found')
         return devices
 
-def update_soil_moisture(device_id: str, moisture: str):
+def update_reading(device_id: str, reading: str):
     with get_connection() as cnx:
         with cnx.cursor() as cursor:
-            sql = "UPDATE `devices` SET moisture = %(m)s, last_time_updated = NOW() WHERE `id` = %(id)s"
-            cursor.execute(sql, args={'id': device_id, 'm': moisture})
+            sql = "UPDATE `readings` SET reading = %(m)s, last_time_updated = NOW() WHERE `device_id` = %(id)s"
+            cursor.execute(sql, args={'id': device_id, 'm': reading})
 
         cnx.commit()
         
+def get_readings_for_device(device_id: int, start_date: str, end_date: str) -> list:
+    with get_connection().cursor() as cursor:
+        sql = 'SELECT * FROM `readings` WHERE `device_id` = %(di)s AND `last_time_updated` BETWEEN %(sd)s AND %(ed)s'
+        cursor.execute(sql, args={'di': device_id, 'sd': start_date, 'ed': end_date})
+
+        return [Reading(reading[0], reading[1], reading[2], reading[3]) for reading in cursor]

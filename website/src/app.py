@@ -1,9 +1,9 @@
 from bokeh.plotting import figure, save, output_file
-from db import create_device, create_user, get_user_by_id, get_user_by_email, get_devices_by_user
+from db import create_device, create_user, get_user_by_id, get_user_by_email, get_devices_by_user, get_readings_for_device
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
-from user import User
+from entities.user import User
 import threading
 
 import os
@@ -99,19 +99,27 @@ def profile():
 def page_not_found(e):
     return render_template('error.html')
 
-@app.route('/graph')
+@app.route('/soil_graph', methods=['POST'])
 @flask_login.login_required
-def graph():
+def soil_graph():
     dummy_data = { '2024-10-29 17:13:54': 99, '2024-10-29 17:18:50': 90, '2024-10-29 17:23:59':  89}
 
-    output_file(f'templates/graphs/{flask_login.current_user.id}_graph.html')
+    start_date = request.form.get('start').replace('T', ' ') + ':00'
+    end_date = request.form.get('end').replace('T', ' ') + ':00'
 
-    plot = figure(title='Soil Moisture Plots', x_axis_label='Timestamps', y_axis_label='Soil Moisture (%)', x_range=list(dummy_data.keys()))
-    plot.vbar(x=list(dummy_data.keys()), top=list(dummy_data.values()), width=0.5)
+    readings = get_readings_for_device(5, start_date, end_date)
+
+    output_file(f'templates/graphs/soil_{flask_login.current_user.id}_graph.html')
+
+    plot = figure(title='Soil Moisture Plot', x_axis_label='Timestamps', y_axis_label='Soil Moisture (%)', x_range=[reading.last_time for reading in readings])
+    plot.vbar(x=[reading.last_time for reading in readings], top=list(reading.value for reading in readings), width=0.5)
 
     plot.xgrid.grid_line_color = None
     plot.y_range.start = 0
 
+    plot.xaxis.major_label_orientation = "vertical"
+
     save(plot)
 
-    return render_template(f'graphs/{flask_login.current_user.id}_graph.html')
+    return render_template(f'graphs/soil_{flask_login.current_user.id}_graph.html')
+

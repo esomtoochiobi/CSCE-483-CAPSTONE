@@ -34,6 +34,7 @@
             </section>
         {% endif %}
         {% endwith %}
+
     <section class="section">
         <h1 class="title">Profile</h1>
         <h2 class="subtitle">Howdy, {{ user.email }}</h2>
@@ -69,16 +70,18 @@
                                 {% if device.device_type == 0 %}
                                 {{device.read('moistureLevel')}}
                                 {% else %}
-                                {{device.water_flow}}
+                                N/A
+                                <!-- {{device.water_flow}} -->
                                 {% endif %}
                             </td>
                             <td>
-                                {% if device.device_type == 0 %}
+                                N/A
+                                <!-- {% if device.device_type == 0 %}
                                 {{device.last_time}}
                                 {% else %}
                                 N/A
                                 {% endif %}
-                            </td>
+                            </td> -->
                         </tr>
                         {% endfor %}
                     {% endif %}
@@ -86,6 +89,8 @@
             </table>
         </div>
     </section>
+
+    <!-- Define form to add a device -->
     <section class="section">
         <div class="container">
             <h3 class="subtitle"><strong>Add a Device</strong></h3>
@@ -120,8 +125,16 @@
     <section class="section">
         <div class="container">
             <h3 class="subtitle"><strong>View Soil Moisture Levels</strong></h3>
-            <form action="/graph" method="get" target="_blank" >
-                <button class="button is-success" type="submit">Show </button>
+            <form action="/soil_graph" method="post" target="_blank" >
+                <div class="field">
+                    <label class="label">Start Date</label>
+                    <input type="datetime-local" name="start" min="2024-01-01T00:00" max="2024-12-31T23:58">
+                </div>
+                <div class="field">
+                    <label class="label">End Date</label>
+                    <input type="datetime-local" name="end" min="2024-01-01T00:01" max="2024-12-31T23:59">
+                </div>
+                <button class="button is-success" type="submit">Show</button>
             </form>
         </div>
     </section>
