@@ -21,6 +21,7 @@ flask-bcrypt = "*"
 pyserial = "*"
 arduino-iot-cloud = "*"
 swig = "*"
+bokeh = "*"
 
 [dev-packages]
 

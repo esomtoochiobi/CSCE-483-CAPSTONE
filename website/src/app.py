@@ -1,3 +1,4 @@
+from bokeh.plotting import figure, save, output_file
 from db import create_device, create_user, get_user_by_id, get_user_by_email, get_devices_by_user
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
@@ -97,3 +98,20 @@ def profile():
 @app.errorhandler(401)
 def page_not_found(e):
     return render_template('error.html')
+
+@app.route('/graph')
+@flask_login.login_required
+def graph():
+    dummy_data = { '2024-10-29 17:13:54': 99, '2024-10-29 17:18:50': 90, '2024-10-29 17:23:59':  89}
+
+    output_file(f'templates/graphs/{flask_login.current_user.id}_graph.html')
+
+    plot = figure(title='Soil Moisture Plots', x_axis_label='Timestamps', y_axis_label='Soil Moisture (%)', x_range=list(dummy_data.keys()))
+    plot.vbar(x=list(dummy_data.keys()), top=list(dummy_data.values()), width=0.5)
+
+    plot.xgrid.grid_line_color = None
+    plot.y_range.start = 0
+
+    save(plot)
+
+    return render_template(f'graphs/{flask_login.current_user.id}_graph.html')
