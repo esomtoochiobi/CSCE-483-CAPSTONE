@@ -45,29 +45,43 @@
                     <tr>
                         <th>Device Name</th>
                         <th>Reading</th>
+                        <th>Last Updated</th>
                     </tr>
                 </thead>
                 <tfoot>
                 </tfoot>
                 <tbody>
-                    {% for device in user.devices %}
-                    <tr>
-                    <td>
-                        {% if device.device_type == 0 %}
-                        Sensor_{{device.id}}
-                        {% else %}
-                        Hub_{{device.id}}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if device.device_type == 0 %}
-                        {{device.read('moistureLevel')}}
-                        {% else %}
-                        {{device.water_flow}}
-                        {% endif %}
-                    </td>
-                    </tr>
-                    {% endfor %}
+                    {% if user.devices == [] %}
+                        <tr>
+                            <td>No devices available.</td>
+                        </tr>
+                    {% else %}
+                        {% for device in user.devices %}
+                        <tr>
+                            <td>
+                                {% if device.device_type == 0 %}
+                                Sensor_{{device.id}}
+                                {% else %}
+                                Hub_{{device.id}}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if device.device_type == 0 %}
+                                {{device.read('moistureLevel')}}
+                                {% else %}
+                                {{device.water_flow}}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if device.device_type == 0 %}
+                                {{device.last_time}}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
                 </tbody>
             </table>
         </div>

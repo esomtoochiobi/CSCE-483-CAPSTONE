@@ -29,9 +29,10 @@ class Device():
         self.device_type = device_type
 
 class Sensor(Device):
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, moisture: int, threshold: int):
+    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, moisture: int, threshold: int, last_time: str):
         super().__init__(_id, device_key, device_id, device_type)
         self.threshold = threshold
+        self.last_time = last_time
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
         logging_func(self.id, self.device_type)
@@ -48,9 +49,8 @@ class Sensor(Device):
 
 
 class Hub(Device):
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, avg_moisture: float, water_flow: int):
+    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, water_flow: int):
         super().__init__(_id, device_key, device_id, device_type)
-        self.avg_moisture = avg_moisture
         self.water_flow = water_flow
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)

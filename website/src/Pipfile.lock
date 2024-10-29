@@ -18,12 +18,12 @@
     "default": {
         "arduino-iot-cloud": {
             "hashes": [
-                "sha256:55344f3597c428f8b58e92eede1ae8fe2fb9780de2d259c54928e973a06aefff",
-                "sha256:e84d37cbd13e3de46fd551779e3b80fda0f96e6e87dbfed33dbc5b4373037aed"
+                "sha256:4a410496b2054f403923435094f593b8278c6fe3a406afb471272e3012e5bb2c",
+                "sha256:b1ae99b660ac05a6eaa9f98d28946e2702bb0914d92203b7c7081a594b3f3e38"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==1.3.3"
+            "version": "==1.4.0"
         },
         "bcrypt": {
             "hashes": [
@@ -336,12 +336,12 @@
         },
         "werkzeug": {
             "hashes": [
-                "sha256:02c9eb92b7d6c06f31a782811505d2157837cea66aaede3e217c7c27c039476c",
-                "sha256:34f2371506b250df4d4f84bfe7b0921e4762525762bbd936614909fe25cd7306"
+                "sha256:1bc0c2310d2fbb07b1dd1105eba2f7af72f322e1e455f2f93c993bee8c8a5f17",
+                "sha256:a8dd59d4de28ca70471a34cba79bed5f7ef2e036a76b3ab0835474246eb41f8d"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==3.0.4"
+            "version": "==3.0.6"
         },
         "zipp": {
             "hashes": [
