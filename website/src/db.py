@@ -76,7 +76,7 @@ def get_devices_by_user(user_id: str):
 def update_soil_moisture(device_id: str, moisture: str):
     with get_connection() as cnx:
         with cnx.cursor() as cursor:
-            sql = "UPDATE `devices` SET moisture = %(m)s WHERE `id` = %(id)s"
+            sql = "UPDATE `devices` SET moisture = %(m)s, last_time_updated = NOW() WHERE `id` = %(id)s"
             cursor.execute(sql, args={'id': device_id, 'm': moisture})
 
         cnx.commit()
