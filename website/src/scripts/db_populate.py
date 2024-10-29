@@ -24,9 +24,9 @@ def generate_readings():
     readings = []
 
     for i in range(12):
-        readings.append(('5', f'{random.randint(0, 100)}', f'\'2024-{i+1}-{random.randint(0,9)} 21:48:17\''))
-        readings.append(('5', f'{random.randint(0, 100)}', f'\'2024-{i+1}-{random.randint(0,9)+10} 21:48:17\''))
-        readings.append(('5', f'{random.randint(0, 100)}', f'\'2024-{i+1}-{random.randint(0,9)+20} 21:48:17\''))
+        readings.append(('6', f'{random.randint(0, 100)}', f'\'2024-{i+1}-{random.randint(1,9)} 21:48:17\''))
+        readings.append(('6', f'{random.randint(0, 100)}', f'\'2024-{i+1}-{random.randint(0,9)+10} 21:48:17\''))
+        readings.append(('6', f'{random.randint(0, 100)}', f'\'2024-{i+1}-{random.randint(0,9)+20} 21:48:17\''))
 
     return readings
 

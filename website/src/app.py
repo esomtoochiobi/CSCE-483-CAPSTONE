@@ -112,7 +112,7 @@ def soil_graph():
     output_file(f'templates/graphs/soil_{flask_login.current_user.id}_graph.html')
 
     plot = figure(title='Soil Moisture Plot', x_axis_label='Timestamps', y_axis_label='Soil Moisture (%)', x_range=[reading.last_time for reading in readings])
-    plot.vbar(x=[reading.last_time for reading in readings], top=list(reading.value for reading in readings), width=0.5)
+    plot.vbar(x=[reading.last_time for reading in readings], top=list(reading.value for reading in readings), width=0.5, legend_label='Sensor_5')
 
     plot.xgrid.grid_line_color = None
     plot.y_range.start = 0
