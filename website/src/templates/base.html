@@ -25,17 +25,29 @@
     </nav>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <section class="section">
-        {% for message in messages %}
-        <div class="notification is-primary">
-            {{ message }}
-        </div>
-        {% endfor %}
+        <section class="section" id="alert_center">
+            {% for message in messages %}
+            <div id="notif{{loop.index}}" class="notification is-primary">
+                {{ message }}
+                <button class="delete" onClick="deleteNotification({{loop.index}})"></button>
+            </div>
+            {% endfor %}
         </section>
         {% endif %}
         {% endwith %}
     <section class="section">
         {% block content %} {% endblock %}
     </section>
+
+    <!-- Client-side Javascript to delete notifications -->
+    <script>
+        function deleteNotification(id) {
+            document.getElementById(`notif${id}`).remove();
+
+            if (document.querySelectorAll('.notification').length == 0) {
+                document.getElementById('alert_center').style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

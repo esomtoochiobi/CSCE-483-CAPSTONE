@@ -91,11 +91,14 @@ def profile():
         return redirect(url_for('profile')) 
 
     for i in range(len(flask_login.current_user.devices)):
+        flask_login.current_user.devices[i].client.start()
+
         # Flash error if device is under threshold
         if (device := flask_login.current_user.devices[i]).device_type == 0:
-            flash(f'Sensor_{device.id} is under threshold')
+            reading = 0 if (value := device.read('moistureLevel')) == None else value
 
-        flask_login.current_user.devices[i].client.start()
+            if reading < device.threshold:
+                flash(f'Sensor_{device.id} is under threshold')
 
     return render_template('profile.html', user=flask_login.current_user)
 
