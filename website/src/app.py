@@ -85,8 +85,9 @@ def profile():
         device_key = request.form.get('device_key')
         device_id = request.form.get('device_id')
         device_type = request.form.get('device_type')
+        soil_type = request.form.get('soil_type')
 
-        create_device(flask_login.current_user.id, device_key, device_id, device_type)
+        create_device(flask_login.current_user.id, device_key, device_id, device_type, soil_type)
         return redirect(url_for('profile')) 
 
     for i in range(len(flask_login.current_user.devices)):
@@ -102,8 +103,6 @@ def page_not_found(e):
 @app.route('/soil_graph', methods=['POST'])
 @flask_login.login_required
 def soil_graph():
-    dummy_data = { '2024-10-29 17:13:54': 99, '2024-10-29 17:18:50': 90, '2024-10-29 17:23:59':  89}
-
     start_date = request.form.get('start').replace('T', ' ') + ':00'
     end_date = request.form.get('end').replace('T', ' ') + ':00'
 

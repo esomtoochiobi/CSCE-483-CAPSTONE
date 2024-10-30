@@ -13,6 +13,8 @@ DB_PASS = os.getenv('DB_PASS')
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = int(os.getenv('DB_PORT'))
 
+SOIL_VALUES = [10, 16, 21, 27, 30, 36, 32, 29, 28, 40, 40]
+
 # Define method to generate a connection to the DB
 def get_connection(): 
     return pymysql.connect(host=DB_HOST,
@@ -46,12 +48,12 @@ def get_user_by_id(user_id: str) -> User:
 
         return None if (user := cursor.fetchone()) == None else User(user[0], user[1], user[2])
 
-# Define method to add device to database
-def create_device(user_id: str, device_key: str, device_id: str, device_type: str):
+# Define method to add sensor to database
+def create_device(user_id: str, device_key: str, device_id: str, device_type: int, soil_type: int):
     with get_connection() as cnx:
         with cnx.cursor() as cursor:
-            sql = "INSERT INTO `devices` (`user_id`, `device_key`, `device_id`, `device_type`) VALUES (%(ui)s, %(dk)s, %(di)s, %(dt)s)"
-            cursor.execute(sql, args={'ui': int(user_id), 'dk': device_key, 'di': device_id, 'dt': int(device_type)})
+            sql = "INSERT INTO `devices` (`user_id`, `device_key`, `device_id`, `device_type`, `soil_threshold`, `soil_type`) VALUES (%(ui)s, %(dk)s, %(di)s, %(dt)s, %(t)s, %(st)s)"
+            cursor.execute(sql, args={'ui': int(user_id), 'dk': device_key, 'di': device_id, 'dt': device_type, 't': SOIL_VALUES[int(soil_type)], 'st': soil_type})
         
         cnx.commit()
 
@@ -66,9 +68,9 @@ def get_devices_by_user(user_id: str):
 
         for device in cursor:
             if device[4] == 0:      # Sensor
-                devices.append(Sensor(device[0], device[2], device[3], device[4]))
+                devices.append(Sensor(device[0], device[2], device[3], device[4], device[5], device[6]))
             else:                   # Hub
-                devices.append(Hub(device[0], device[2], device[3], device[4]))
+                devices.append(Hub(device[0], device[2], device[3], device[4], device[5], device[6]))
 
 
         print(f'{len(devices)} devices found')

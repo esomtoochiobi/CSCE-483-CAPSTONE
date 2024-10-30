@@ -21,16 +21,18 @@ def on_moist_change(client, value):
     update_reading(client._sqlid, str(value))
 
 class Device():
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int):
+    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, threshold: int, soil_type: int):
         # Parameters given from DB
         self.id = _id
         self.device_key = device_key.encode('ascii')
         self.device_id = device_id.encode('ascii')
         self.device_type = device_type
+        self.threshold = threshold
+        self.soil_type = soil_type
 
 class Sensor(Device):
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int):
-        super().__init__(_id, device_key, device_id, device_type)
+    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, threshold: int, soil_type: int):
+        super().__init__(_id, device_key, device_id, device_type, threshold, soil_type)
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
         logging_func(self.id, self.device_type)
@@ -47,8 +49,8 @@ class Sensor(Device):
 
 
 class Hub(Device):
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, water_flow: int):
-        super().__init__(_id, device_key, device_id, device_type)
+    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, threshold: int, soil_type: int):
+        super().__init__(_id, device_key, device_id, device_type, threshold, soil_type)
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
         logging_func(self.id, self.device_type)

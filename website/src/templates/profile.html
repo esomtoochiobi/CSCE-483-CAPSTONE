@@ -47,6 +47,7 @@
                         <th>Device Name</th>
                         <th>Reading</th>
                         <th>Last Updated</th>
+                        <th>Soil Moisture Threshold</th>
                     </tr>
                 </thead>
                 <tfoot>
@@ -80,8 +81,16 @@
                                 {{device.last_time}}
                                 {% else %}
                                 N/A
+                                {% endif %} -->
+                            </td>
+                                <td>
+                                {% if device.device_type == 0 %}
+                                {{device.threshold}}
+                                {% else %}
+                                N/A
+                                <!-- {{device.water_flow}} -->
                                 {% endif %}
-                            </td> -->
+                            </td>
                         </tr>
                         {% endfor %}
                     {% endif %}
@@ -114,6 +123,26 @@
                             <select name="device_type">
                                 <option value="0">Sensor</option>
                                 <option value="1">Hub</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Soil Type</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="soil_type">
+                                <option value="0">Sandy</option>
+                                <option value="1">Loamy sand</option>
+                                <option value="2">Sandy loam</option>
+                                <option value="3">Loam</option>
+                                <option value="4">Silt loam</option>
+                                <option value="5">Sandy clay loam</option>
+                                <option value="6">Sandy clay</option>
+                                <option value="7">Clay loam</option>
+                                <option value="8">Silty clay loam</option>
+                                <option value="9">Silty clay</option>
+                                <option value="10">Clay</option>
                             </select>
                         </div>
                     </div>
