@@ -48,6 +48,7 @@
                         <th>Device Name</th>
                         <th>Reading</th>
                         <th>Last Updated</th>
+                        <th>Within Threshold</th>
                         <th>Soil Moisture Threshold</th>
                     </tr>
                 </thead>
@@ -83,6 +84,13 @@
                                 {% else %}
                                 N/A
                                 {% endif %} -->
+                            </td>
+                            <td>
+                                {% if device.read('moistureLevel') < device.threshold %}
+                                ❌
+                                {% else %}
+                                ✅
+                                {% endif %}
                             </td>
                             <td>
                                 {% if device.device_type == 0 %}
