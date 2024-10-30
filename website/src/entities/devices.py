@@ -31,8 +31,8 @@ class Device():
         self.soil_type = soil_type
 
 class Sensor(Device):
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, threshold: int, soil_type: int):
-        super().__init__(_id, device_key, device_id, device_type, threshold, soil_type)
+    def __init__(self, _id: int, device_key: str, device_id: str, threshold: int, soil_type: int):
+        super().__init__(_id, device_key, device_id, 0, threshold, soil_type)
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
         logging_func(self.id, self.device_type)
@@ -49,8 +49,8 @@ class Sensor(Device):
 
 
 class Hub(Device):
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, threshold: int, soil_type: int):
-        super().__init__(_id, device_key, device_id, device_type, threshold, soil_type)
+    def __init__(self, _id: int, device_key: str, device_id: str, threshold: int, soil_type: int):
+        super().__init__(_id, device_key, device_id, 1, threshold, soil_type)
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
         logging_func(self.id, self.device_type)

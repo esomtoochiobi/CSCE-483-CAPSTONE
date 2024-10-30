@@ -68,9 +68,9 @@ def get_devices_by_user(user_id: str):
 
         for device in cursor:
             if device[4] == 0:      # Sensor
-                devices.append(Sensor(device[0], device[2], device[3], device[4], device[5], device[6]))
+                devices.append(Sensor(device[0], device[2], device[3], device[5], device[6]))
             else:                   # Hub
-                devices.append(Hub(device[0], device[2], device[3], device[4], device[5], device[6]))
+                devices.append(Hub(device[0], device[2], device[3], device[5], device[6]))
 
 
         print(f'{len(devices)} devices found')
