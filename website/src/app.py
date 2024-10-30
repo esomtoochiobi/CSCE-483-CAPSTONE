@@ -1,5 +1,5 @@
 from bokeh.plotting import figure, save, output_file
-from db import create_device, create_user, get_user_by_id, get_user_by_email, get_devices_by_user, get_readings_for_device
+from db import create_device, create_user, get_user_by_id, get_user_by_email, get_devices_by_user, get_readings_for_device, update_device_threshold
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
@@ -91,6 +91,10 @@ def profile():
         return redirect(url_for('profile')) 
 
     for i in range(len(flask_login.current_user.devices)):
+        # Flash error if device is under threshold
+        if (device := flask_login.current_user.devices[i]).device_type == 0:
+            flash(f'Sensor_{device.id} is under threshold')
+
         flask_login.current_user.devices[i].client.start()
 
     return render_template('profile.html', user=flask_login.current_user)
@@ -122,3 +126,12 @@ def soil_graph():
 
     return render_template(f'graphs/soil_{flask_login.current_user.id}_graph.html')
 
+@app.route('/update_threshold', methods=['POST'])
+@flask_login.login_required
+def update_threshold():
+    device_id = request.form.get('device_id')
+    threshold = request.form.get('threshold')
+
+    update_device_threshold(device_id, threshold)
+
+    return redirect(url_for('profile'))

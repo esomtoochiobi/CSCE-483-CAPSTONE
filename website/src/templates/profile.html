@@ -83,13 +83,19 @@
                                 N/A
                                 {% endif %} -->
                             </td>
-                                <td>
+                            <td>
                                 {% if device.device_type == 0 %}
-                                {{device.threshold}}
+                                <form action="/update_threshold" method="post" id="threshold_{{device.id}}">
+                                    <input class="input" type="number" placeholder="Set threshold here..." value="{{device.threshold}}" name="threshold"/>
+                                    <input type="hidden" name="device_id" value="{{device.id}}">
+                                </form>
                                 {% else %}
                                 N/A
                                 <!-- {{device.water_flow}} -->
                                 {% endif %}
+                            </td>
+                            <td>
+                                <button class="button is-success" type="submit" form="threshold_{{device.id}}">Update Threshold</button>
                             </td>
                         </tr>
                         {% endfor %}
