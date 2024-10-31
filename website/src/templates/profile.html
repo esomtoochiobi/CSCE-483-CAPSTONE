@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-menu">
             <div class="navbar-start">
@@ -23,23 +24,26 @@
             </div>
         <div>
     </nav>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <section class="section" id="alert_center">
-            {% for message in messages %}
-                <div id="notif{{loop.index}}"class="notification is-primary">
-                    {{ message }}
-                    <button class="delete" onClick="deleteNotification({{loop.index}})"></button>
-                </div>
-            {% endfor %}
-            </section>
-        {% endif %}
-        {% endwith %}
+    
+    <!-- Display Flask's flashed messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <section class="section" id="alert_center">
+        {% for message in messages %}
+            <div id="notif{{loop.index}}"class="notification is-primary">
+                {{ message }}
+                <button class="delete" onClick="deleteNotification({{loop.index}})"></button>
+            </div>
+        {% endfor %}
+        </section>
+    {% endif %}
+    {% endwith %}
 
     <section class="section">
         <h1 class="title">Profile</h1>
         <h2 class="subtitle">Howdy, {{ user.email }}</h2>
 
+        <!-- Define container to hold Device list -->
         <div class="container">
             <h3 class="subtitle"><strong>Devices</strong></h3>
             <table class="table">
@@ -74,17 +78,9 @@
                                 {{device.read('moistureLevel')}}
                                 {% else %}
                                 N/A
-                                <!-- {{device.water_flow}} -->
                                 {% endif %}
                             </td>
-                            <td>
-                                N/A
-                                <!-- {% if device.device_type == 0 %}
-                                {{device.last_time}}
-                                {% else %}
-                                N/A
-                                {% endif %} -->
-                            </td>
+                            <td>N/A</td>
                             <td>
                                 {% if device.read('moistureLevel') < device.threshold %}
                                 ❌
@@ -95,16 +91,21 @@
                             <td>
                                 {% if device.device_type == 0 %}
                                 <form action="/update_threshold" method="post" id="threshold_{{device.id}}">
-                                    <input class="input" type="number" placeholder="Set threshold here..." value="{{device.threshold}}" name="threshold"/>
-                                    <input type="hidden" name="device_id" value="{{device.id}}">
+                                    <input class="input" type="number" 
+                                        placeholder="Set threshold here..." value="{{device.threshold}}"
+                                        name="threshold"/>
+                                    <input type="hidden" name="device_id" 
+                                        value="{{device.id}}">
                                 </form>
                                 {% else %}
                                 N/A
-                                <!-- {{device.water_flow}} -->
                                 {% endif %}
                             </td>
                             <td>
-                                <button class="button is-primary" type="submit" form="threshold_{{device.id}}">Update Threshold</button>
+                                <button class="button is-primary" type="submit" 
+                                    form="threshold_{{device.id}}">
+                                    Update Threshold
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -172,11 +173,13 @@
             <form action="/soil_graph" method="post" target="_blank" >
                 <div class="field">
                     <label class="label">Start Date</label>
-                    <input type="datetime-local" name="start" min="2024-01-01T00:00" max="2024-12-31T23:58">
+                    <input type="datetime-local" name="start" 
+                        min="2024-01-01T00:00" max="2024-12-31T23:58">
                 </div>
                 <div class="field">
                     <label class="label">End Date</label>
-                    <input type="datetime-local" name="end" min="2024-01-01T00:01" max="2024-12-31T23:59">
+                    <input type="datetime-local" name="end" 
+                        min="2024-01-01T00:01" max="2024-12-31T23:59">
                 </div>
                 <button class="button is-primary" type="submit">Show</button>
             </form>

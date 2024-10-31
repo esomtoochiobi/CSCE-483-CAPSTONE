@@ -1,53 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} {% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>{% block title %} {% endblock %}</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-menu">
-            <div class="navbar-menu">
-                <div class="navbar-start">
-                    <a class="navbar-item" href="{{ url_for('index') }}">Landing</a>
-                    <a class="navbar-item" href="{{ url_for('login') }}">Login</a>
-                    <a class="navbar-item" href="{{ url_for('register') }}">Register</a>
-                </div>
-            
-                <div class="navbar-end">
-                    <a class="navbar-item" href="{{ url_for('logout') }}">Logout</a>
-                    <a class="navbar-item" href="{{ url_for('profile') }}">Profile</a>
-                </div>
-                <div>
-        <div>
-    </nav>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <section class="section" id="alert_center">
-            {% for message in messages %}
-            <div id="notif{{loop.index}}" class="notification is-primary">
-                {{ message }}
-                <button class="delete" onClick="deleteNotification({{loop.index}})"></button>
-            </div>
-            {% endfor %}
-        </section>
-        {% endif %}
-        {% endwith %}
-    <section class="section">
-        {% block content %} {% endblock %}
-    </section>
+	<!-- Navbar -->
+	<nav class="navbar">
+		<div class="navbar-menu">
+			<div class="navbar-menu">
+					<div class="navbar-start">
+						<a class="navbar-item" href="{{ url_for('index') }}">Landing</a>
+						<a class="navbar-item" href="{{ url_for('login') }}">Login</a>
+						<a class="navbar-item" href="{{ url_for('register') }}">Register</a>
+					</div>
+			
+					<div class="navbar-end">
+						<a class="navbar-item" href="{{ url_for('logout') }}">Logout</a>
+						<a class="navbar-item" href="{{ url_for('profile') }}">Profile</a>
+					</div>
+				<div>
+		<div>
+	</nav>
 
-    <!-- Client-side Javascript to delete notifications -->
-    <script>
-        function deleteNotification(id) {
-            document.getElementById(`notif${id}`).remove();
+	<!-- Display Flask's flashed messages -->
+	{% with messages = get_flashed_messages() %}
+	{% if messages %}
+	<section class="section" id="alert_center">
+		{% for message in messages %}
+		<div id="notif{{loop.index}}" class="notification is-primary">
+			{{ message }}
+			<button class="delete" onClick="deleteNotification({{loop.index}})"></button>
+		</div>
+		{% endfor %}
+	</section>
+	{% endif %}
+	{% endwith %}
 
-            if (document.querySelectorAll('.notification').length == 0) {
-                document.getElementById('alert_center').style.display = 'none';
-            }
-        }
-    </script>
+	<!-- Render content per template -->
+	<section class="section">
+		{% block content %} {% endblock %}
+	</section>
+
+	<!-- Client-side Javascript to delete notifications -->
+	<script>
+		function deleteNotification(id) {
+			document.getElementById(`notif${id}`).remove();
+
+			// Check if there are any notifications left
+			if (document.querySelectorAll('.notification').length == 0) {
+				document.getElementById('alert_center').style.display = 'none';
+			}
+		}
+	</script>
 </body>
 </html>

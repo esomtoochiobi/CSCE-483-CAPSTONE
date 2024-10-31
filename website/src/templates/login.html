@@ -4,18 +4,20 @@
 
 {% block content %}
 <form action="" method="post">
-    <div class="field">
-        <label class="label" for="email">Email</label>
-        <div class="control">
-            <input class="input" name="email" type="email" placeholder="Enter email...">
-        </div>
-    </div>
-    <div class="field">
-        <label class="label" for="password">Password</label>
-        <div class="control">
-            <input class="input" name="password" type="password" placeholder="Enter password...">
-        </div>
-    </div>
-    <button class="button is-primary" type="submit">Submit</button>
+<div class="field">
+  <label class="label" for="email">Email</label>
+  <div class="control">
+	<input class="input" name="email" 
+	  type="email" placeholder="Enter email...">
+  </div>
+</div>
+  <div class="field">
+	<label class="label" for="password">Password</label>
+	<div class="control">
+	  <input class="input" name="password" 
+		type="password" placeholder="Enter password...">
+	</div>
+  </div>
+  <button class="button is-primary" type="submit">Submit</button>
 </form>
 {% endblock %}
