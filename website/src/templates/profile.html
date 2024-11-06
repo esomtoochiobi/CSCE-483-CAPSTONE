@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='switch.min.css') }}">
 </head>
 
 <body>
@@ -115,16 +116,20 @@
 							<form action="/update_valves" method="post">
 								<td>
 									<div class="field">
-										<label class="checkbox">
-											<input type="checkbox" {{'checked' if device.read('valve1') else ''}} name="valve1">
+										<label class="switch is-rounded">
+											<input type="checkbox" {{ 'checked' if device.read('valve1') else ''}} 
+                                                name="valve1">
+											<span class="check"></span>
 											<span class="control-label">Close Valve?</span>
 										</label>
 									</div>
 								</td>
 								<td>
                                     <div class="field">
-                                        <label class="checkbox">
-                                            <input type="checkbox" {{'checked' if device.read('valve2') else ''}} name="valve2">
+                                        <label class="switch is-rounded">
+                                            <input type="checkbox" {{ 'checked' if device.read('valve2') else '' }} 
+                                                name="valve2">
+                                            <span class="check"></span>
                                             <span class="control-label">Close Valve?</span>
                                         </label>
                                     </div>
