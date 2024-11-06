@@ -90,15 +90,19 @@ def profile():
         create_device(flask_login.current_user.id, device_key, device_id, device_type, soil_type)
         return redirect(url_for('profile')) 
 
-    for i in range(len(flask_login.current_user.devices)):
-        flask_login.current_user.devices[i].client.start()
+    for i in range(len(flask_login.current_user.devices['sensor'])):
+        device = flask_login.current_user.devices['sensor'][i]
+        device.start()
 
         # Flash error if device is under threshold
-        if (device := flask_login.current_user.devices[i]).device_type == 0:
-            reading = 0 if (value := device.read('moistureLevel')) == None else value
+        
+        reading = 0 if (value := device.read('moistureLevel')) == None else value
 
-            if reading < device.threshold:
-                flash(f'Sensor_{device.id} is under threshold')
+        if reading < device.threshold:
+            flash(f'Sensor_{device.id} is under threshold')
+
+    for hub in flask_login.current_user.devices['hub']:
+        hub.start()
 
     return render_template('profile.html', user=flask_login.current_user)
 
@@ -136,5 +140,28 @@ def update_threshold():
     threshold = request.form.get('threshold')
 
     update_device_threshold(device_id, threshold)
+
+    return redirect(url_for('profile'))
+
+@app.route('/update_valves', methods=['POST'])
+@flask_login.login_required
+def update_valves():
+    device_id = int(request.form.get('device_id'))
+    device = next(device for device in flask_login.current_user.devices['hub'] if device.id == device_id)
+    
+    valve1 = request.form.get('valve1') != None
+    valve2 = request.form.get('valve2') != None
+
+    print(device.read('valve1'), device.read('valve2'))
+
+    if valve1 ^ device.read('valve1'):
+        print('1')
+        device.client['valve1'] = valve1
+
+    if valve2 ^ device.read('valve2'):
+        print('2')
+        device.client['valve2'] = valve2
+
+    device.client.update()
 
     return redirect(url_for('profile'))

@@ -64,15 +64,14 @@ def get_devices_by_user(user_id: str):
         sql = "SELECT * FROM `devices` WHERE `user_id` = %(id)s"
         cursor.execute(sql, args={'id': int(user_id)})
 
-        devices = []
+        devices = {'sensor': [], 'hub': []}
 
         for device in cursor:
             if device[4] == 0:      # Sensor
-                devices.append(Sensor(device[0], device[2], device[3], device[5], device[6]))
+                devices['sensor'].append(Sensor(device[0], device[2], device[3], device[5], device[6]))
             else:                   # Hub
-                devices.append(Hub(device[0], device[2], device[3], device[5], device[6]))
+                devices['hub'].append(Hub(device[0], device[2], device[3], device[5], device[6]))
 
-        print(f'{len(devices)} devices found')
         return devices
 
 def update_device_threshold(device_id: int, threshold: int):
@@ -83,10 +82,10 @@ def update_device_threshold(device_id: int, threshold: int):
 
         cnx.commit()
 
-def update_reading(device_id: str, reading: str):
+def create_reading(device_id: str, reading: str):
     with get_connection() as cnx:
         with cnx.cursor() as cursor:
-            sql = "UPDATE `readings` SET `reading` = %(m)s, `last_time_updated` = NOW() WHERE `device_id` = %(di)s"
+            sql = "INSERT `readings` (device_id, reading) VALUES (%(di)s, %(m)s)"
             cursor.execute(sql, args={'di': device_id, 'm': reading})
 
         cnx.commit()

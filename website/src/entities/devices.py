@@ -1,5 +1,5 @@
 from arduino_iot_cloud import ArduinoCloudClient
-from db import update_reading
+from db import create_reading
 
 import os
 import time
@@ -18,24 +18,23 @@ def logging_func(_id, device_type):
 
 def on_moist_change(client, value):
     client["moistureLevel"] = value
-    update_reading(client._sqlid, str(value))
+    create_reading(client._sqlid, str(value))
 
 class Device():
-    def __init__(self, _id: int, device_key: str, device_id: str, device_type: int, threshold: int, soil_type: int):
+    def __init__(self, _id: int, device_key: str, device_id: str, threshold: int, soil_type: int):
         # Parameters given from DB
         self.id = _id
         self.device_key = device_key.encode('ascii')
         self.device_id = device_id.encode('ascii')
-        self.device_type = device_type
         self.threshold = threshold
         self.soil_type = soil_type
 
 class Sensor(Device):
     def __init__(self, _id: int, device_key: str, device_id: str, threshold: int, soil_type: int):
-        super().__init__(_id, device_key, device_id, 0, threshold, soil_type)
+        super().__init__(_id, device_key, device_id, threshold, soil_type)
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
-        logging_func(self.id, self.device_type)
+        logging_func(self.id, 0)
 
         self.client._sqlid = _id
         self.client.register('moistureLevel', on_write=on_moist_change, value=None)
@@ -50,10 +49,13 @@ class Sensor(Device):
 
 class Hub(Device):
     def __init__(self, _id: int, device_key: str, device_id: str, threshold: int, soil_type: int):
-        super().__init__(_id, device_key, device_id, 1, threshold, soil_type)
+        super().__init__(_id, device_key, device_id, threshold, soil_type)
 
         self.client = ArduinoCloudClient(device_id=self.device_id, username=self.device_id, password=self.device_key, sync_mode=True)
-        logging_func(self.id, self.device_type)
+        self.client.register('valve1', value=None)
+        self.client.register('valve2', value=None)
+
+        logging_func(self.id, 1)
 
     def start(self):
         self.client.start()

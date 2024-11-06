@@ -46,72 +46,101 @@
         <!-- Define container to hold Device list -->
         <div class="container">
             <h3 class="subtitle"><strong>Devices</strong></h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Device Name</th>
-                        <th>Reading</th>
-                        <th>Last Updated</th>
-                        <th>Within Threshold</th>
-                        <th>Soil Moisture Threshold</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                </tfoot>
-                <tbody>
-                    {% if user.devices == [] %}
-                        <tr>
-                            <td>No devices available.</td>
-                        </tr>
-                    {% else %}
-                        {% for device in user.devices %}
-                        <tr>
-                            <td>
-                                {% if device.device_type == 0 %}
-                                Sensor_{{device.id}}
-                                {% else %}
-                                Hub_{{device.id}}
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if device.device_type == 0 %}
-                                {{device.read('moistureLevel')}}
-                                {% else %}
-                                N/A
-                                {% endif %}
-                            </td>
-                            <td>N/A</td>
-                            <td>
-                                {% if device.read('moistureLevel') < device.threshold %}
-                                ❌
-                                {% else %}
-                                ✅
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if device.device_type == 0 %}
-                                <form action="/update_threshold" method="post" id="threshold_{{device.id}}">
-                                    <input class="input" type="number" 
-                                        placeholder="Set threshold here..." value="{{device.threshold}}"
-                                        name="threshold"/>
-                                    <input type="hidden" name="device_id" 
-                                        value="{{device.id}}">
-                                </form>
-                                {% else %}
-                                N/A
-                                {% endif %}
-                            </td>
-                            <td>
-                                <button class="button is-primary" type="submit" 
-                                    form="threshold_{{device.id}}">
-                                    Update Threshold
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% endif %}
-                </tbody>
+
+            <!-- Sensor Table -->
+            <table class="table"> 
+				<thead>
+					<tr>
+						<th>Device Name</th>
+						<th>Reading</th>
+						<th>Within Threshold</th>
+						<th>Soil Moisture Threshold</th>
+					</tr>
+				</thead>	
+				<tbody>
+					{% if user.devices['sensor'] == [] %}
+					<tr>
+						<td>No devices available.</td>
+					</tr>
+					{% else %}
+						{% for device in user.devices['sensor'] %}
+						<tr>
+							<td>Sensor_{{device.id}}</td>	
+							<td>{{device.read('moistureLevel')}}</td>
+							<td>
+								{% if device.read('moistureLevel') < device.threshold %}
+								❌
+								{% else %} 
+								✅ 
+								{% endif %}
+							</td>
+							<td>
+								<form action="/update_threshold" method="post" id="threshold_{{device.id}}">
+									<input class="input" type="number" placeholder="Set threshold here..." 
+										value="{{device.threshold}}" name="threshold"/>
+									<input type="hidden" name="device_id" value="{{device.id}}">
+								</form>
+							</td>
+							<td>
+								<button class="button is-primary" type="submit" form="threshold_{{device.id}}">
+									Update Threshold
+								</button>
+							</td>
+						</tr>
+						{% endfor %}
+					{% endif %}
+				</tbody>
             </table>
+
+            <!-- Hub Table -->
+			 <table class="table">
+				<thead>
+					<tr>
+						<th>Device Name</th>
+						<th>Water Flow</th>
+						<th>Valve 1</th>
+						<th>Valve 2</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if user.devices['hub'] == [] %}
+					<tr>
+						<td>No devices available.</td>
+					</tr>
+					{% else %}
+						{% for device in user.devices['hub'] %}
+						<tr>
+							<td>Hub_{{device.id}}</td>
+							<td>[Waterflow Goes Here]</td>
+							<form action="/update_valves" method="post">
+								<td>
+									<div class="field">
+										<label class="checkbox">
+											<input type="checkbox" {{'checked' if device.read('valve1') else ''}} name="valve1">
+											<span class="control-label">Close Valve?</span>
+										</label>
+									</div>
+								</td>
+								<td>
+                                    <div class="field">
+                                        <label class="checkbox">
+                                            <input type="checkbox" {{'checked' if device.read('valve2') else ''}} name="valve2">
+                                            <span class="control-label">Close Valve?</span>
+                                        </label>
+                                    </div>
+								</td>
+								<td>
+									<button class="button is-primary" type="submit">
+										Update Valves
+									</button>
+								</td>
+								<input type="hidden" name="device_id" value="{{device.id}}">
+							</form>
+						</tr>
+						{% endfor %}
+					{% endif %}
+				</tbody>
+			 </table>
         </div>
     </section>
 
@@ -167,6 +196,8 @@
             </form>
         </div>
     </section>
+
+	<!-- Define component to show soil moisture data -->
     <section class="section">
         <div class="container">
             <h3 class="subtitle"><strong>View Soil Moisture Levels</strong></h3>
