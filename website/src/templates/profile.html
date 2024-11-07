@@ -98,7 +98,8 @@
 				<thead>
 					<tr>
 						<th>Device Name</th>
-						<th>Water Flow</th>
+						<th>Water Flow 1</th>
+                        <th>Water Flow 2</th>
 						<th>Valve 1</th>
 						<th>Valve 2</th>
 					</tr>
@@ -112,8 +113,9 @@
 						{% for device in user.devices['hub'] %}
 						<tr>
 							<td>Hub_{{device.id}}</td>
-							<td>[Waterflow Goes Here]</td>
-							<form action="/update_valves" method="post">
+							<td>{{ 0 if device.read('waterFlow1') == None else device.read('waterFlow1')}}</td>
+							<td>{{ 0 if device.read('waterFlow2') == None else device.read('waterFlow2')}}</td>
+                            <form action="/update_valves" method="post">
 								<td>
 									<div class="field">
 										<label class="switch is-rounded">
