@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='switch.min.css') }}">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('index') }}">Landing</a>
+                <a class="navbar-item" href="{{ url_for('login') }}">Login</a>
+                <a class="navbar-item" href="{{ url_for('register') }}">Register</a>
+            </div>
+
+            <div class="navbar-end">
+                <a class="navbar-item" href="{{ url_for('logout') }}">Logout</a>
+                <a class="navbar-item" href="{{ url_for('profile') }}">Profile</a>
+            </div>
+        <div>
+    </nav>
+    
+    <!-- Display Flask's flashed messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <section class="section" id="alert_center">
+        {% for message in messages %}
+            <div id="notif{{loop.index}}"class="notification is-primary">
+                {{ message }}
+                <button class="delete" onClick="deleteNotification({{loop.index}})"></button>
+            </div>
+        {% endfor %}
+        </section>
+    {% endif %}
+    {% endwith %}
+
+    <section class="section">
+        <h1 class="title">Profile</h1>
+        <h2 class="subtitle">Howdy, {{ user.email }}</h2>
+
+        <!-- Define container to hold Device list -->
+        <div class="container">
+            <h3 class="subtitle"><strong>Devices</strong></h3>
+
+            <!-- Sensor Table -->
+            <table class="table"> 
+				<thead>
+					<tr>
+						<th>Device Name</th>
+						<th>Reading</th>
+						<th>Within Threshold</th>
+						<th>Soil Moisture Threshold</th>
+					</tr>
+				</thead>	
+				<tbody>
+					{% if user.devices['sensor'] == [] %}
+					<tr>
+						<td>No devices available.</td>
+					</tr>
+					{% else %}
+						{% for device in user.devices['sensor'] %}
+						<tr>
+							<td>Sensor_{{device.id}}</td>	
+							<td>{{device.read('moistureLevel')}}</td>
+							<td>
+								{% if device.read('moistureLevel') < device.threshold %}
+								❌
+								{% else %} 
+								✅ 
+								{% endif %}
+							</td>
+							<td>
+								<form action="/update_threshold" method="post" id="threshold_{{device.id}}">
+									<input class="input" type="number" placeholder="Set threshold here..." 
+										value="{{device.threshold}}" name="threshold"/>
+									<input type="hidden" name="device_id" value="{{device.id}}">
+								</form>
+							</td>
+							<td>
+								<button class="button is-primary" type="submit" form="threshold_{{device.id}}">
+									Update Threshold
+								</button>
+							</td>
+						</tr>
+						{% endfor %}
+					{% endif %}
+				</tbody>
+            </table>
+
+            <!-- Hub Table -->
+			 <table class="table">
+				<thead>
+					<tr>
+						<th>Device Name</th>
+						<th>Water Flow 1</th>
+                        <th>Water Flow 2</th>
+						<th>Valve 1</th>
+						<th>Valve 2</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if user.devices['hub'] == [] %}
+					<tr>
+						<td>No devices available.</td>
+					</tr>
+					{% else %}
+						{% for device in user.devices['hub'] %}
+						<tr>
+							<td>Hub_{{device.id}}</td>
+							<td>{{ 0 if device.read('waterFlow1') == None else device.read('waterFlow1')}}</td>
+							<td>{{ 0 if device.read('waterFlow2') == None else device.read('waterFlow2')}}</td>
+                            <form action="/update_valves" method="post">
+								<td>
+									<div class="field">
+										<label class="switch is-rounded">
+											<input type="checkbox" {{ 'checked' if device.read('valve1') else ''}} 
+                                                name="valve1">
+											<span class="check"></span>
+											<span class="control-label">Close Valve?</span>
+										</label>
+									</div>
+								</td>
+								<td>
+                                    <div class="field">
+                                        <label class="switch is-rounded">
+                                            <input type="checkbox" {{ 'checked' if device.read('valve2') else '' }} 
+                                                name="valve2">
+                                            <span class="check"></span>
+                                            <span class="control-label">Close Valve?</span>
+                                        </label>
+                                    </div>
+								</td>
+								<td>
+									<button class="button is-primary" type="submit">
+										Update Valves
+									</button>
+								</td>
+								<input type="hidden" name="device_id" value="{{device.id}}">
+							</form>
+						</tr>
+						{% endfor %}
+					{% endif %}
+				</tbody>
+			 </table>
+        </div>
+    </section>
+
+    <!-- Define form to add a device -->
+    <section class="section">
+        <div class="container">
+            <h3 class="subtitle"><strong>Add a Device</strong></h3>
+            <form action="" method="post">
+                <div class="field">
+                    <label class="label" for="device_key">Device Key</label>
+                    <div class="control">
+                        <input class="input" name="device_key" type="text" placeholder="Enter device key...">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label" for="device_id">Device ID</label>
+                    <div class="control">
+                        <input class="input" name="device_id" type="text" placeholder="Enter device ID...">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Device Type</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="device_type">
+                                <option value="0">Sensor</option>
+                                <option value="1">Hub</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Soil Type</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="soil_type">
+                                <option value="0">Sandy</option>
+                                <option value="1">Loamy sand</option>
+                                <option value="2">Sandy loam</option>
+                                <option value="3">Loam</option>
+                                <option value="4">Silt loam</option>
+                                <option value="5">Sandy clay loam</option>
+                                <option value="6">Sandy clay</option>
+                                <option value="7">Clay loam</option>
+                                <option value="8">Silty clay loam</option>
+                                <option value="9">Silty clay</option>
+                                <option value="10">Clay</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="button is-primary" type="submit">Submit</button>
+            </form>
+        </div>
+    </section>
+
+	<!-- Define component to show soil moisture data -->
+    <section class="section">
+        <div class="container">
+            <h3 class="subtitle"><strong>View Soil Moisture Levels</strong></h3>
+            <form action="/soil_graph" method="post" target="_blank" >
+                <div class="field">
+                    <label class="label">Start Date</label>
+                    <input type="datetime-local" name="start" 
+                        min="2024-01-01T00:00" max="2024-12-31T23:58">
+                </div>
+                <div class="field">
+                    <label class="label">End Date</label>
+                    <input type="datetime-local" name="end" 
+                        min="2024-01-01T00:01" max="2024-12-31T23:59">
+                </div>
+                <button class="button is-primary" type="submit">Show</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Client-side Javascript to delete notifications -->
+    <script>
+        function deleteNotification(id) {
+            document.getElementById(`notif${id}`).remove();
+
+            if (document.querySelectorAll('.notification').length == 0) {
+                document.getElementById('alert_center').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -18,8 +18,12 @@ python-dotenv = "*"
 pymysql = "*"
 flask-login = "*"
 flask-bcrypt = "*"
+pyserial = "*"
+arduino-iot-cloud = "*"
+swig = "*"
+bokeh = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.12"
