@@ -87,6 +87,12 @@
 									Update Threshold
 								</button>
 							</td>
+                            <td>
+                                <form action="/delete_device" method="post">
+                                    <input type="hidden" name="device_id" value="{{device.id}}">
+                                    <button type="submit" class="delete"></button>
+                                </form>
+                            </td>
 						</tr>
 						{% endfor %}
 					{% endif %}

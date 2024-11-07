@@ -96,3 +96,11 @@ def get_readings_for_device(device_id: int, start_date: str, end_date: str) -> l
         cursor.execute(sql, args={'di': device_id, 'sd': start_date, 'ed': end_date})
 
         return [Reading(reading[0], reading[1], reading[2], reading[3]) for reading in cursor]
+    
+def delete_device_by_id(device_id:int):
+    with get_connection() as cnx:
+        with cnx.cursor() as cursor:
+            sql = 'DELETE FROM `devices` WHERE `id` = %(di)s'
+            cursor.execute(sql, args={'di': device_id})
+            
+        cnx.commit()

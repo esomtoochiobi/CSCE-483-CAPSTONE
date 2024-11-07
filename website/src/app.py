@@ -1,5 +1,5 @@
 from bokeh.plotting import figure, save, output_file
-from db import create_device, create_user, get_user_by_id, get_user_by_email, get_devices_by_user, get_readings_for_device, update_device_threshold
+from db import create_device, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_devices_by_user, get_readings_for_device, update_device_threshold
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
@@ -26,6 +26,7 @@ bcrypt = Bcrypt(app)
 def load_user(user_id):
     user = get_user_by_id(user_id)
     user.devices = get_devices_by_user(user_id)
+    print(user.devices)
     return user
 
 # Routes
@@ -164,4 +165,13 @@ def update_valves():
 
     device.client.update()
 
+    return redirect(url_for('profile'))
+
+@app.route('/delete_device', methods=['POST'])
+@flask_login.login_required
+def delete_device(): 
+    device_id = int(request.form.get('device_id'))
+    
+    delete_device_by_id(device_id)
+    
     return redirect(url_for('profile'))
