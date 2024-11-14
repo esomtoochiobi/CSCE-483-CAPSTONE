@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="title">{% block title %}Create a Sensor{% endblock %}</h1>
+<h2 class="subtitle">Add a sensor</h2>
+<form action="" method="post">
+    <div class="field">
+        <label for="thing_id" class="label">Device ID</label>
+        <div class="control">
+            <input type="text" name="thing_id" class="input" placeholder="Enter device ID here...">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Associated Hub</label>
+        <div class="control">
+            <div class="select">
+                <select name="hub_id">
+                    {% for hub in user.hubs %}
+                    <option value="{{hub.id}}">{{hub.id}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Zone</label>
+        <div class="control">
+            <div class="select">
+                <select name="zone">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <button class="button is-primary" type="submit">Submit</button>
+</form>
+{% endblock %}

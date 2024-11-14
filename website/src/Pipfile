@@ -22,6 +22,8 @@ pyserial = "*"
 arduino-iot-cloud = "*"
 swig = "*"
 bokeh = "*"
+arduino-iot-client = "*"
+requests-oauthlib = "*"
 
 [dev-packages]
 

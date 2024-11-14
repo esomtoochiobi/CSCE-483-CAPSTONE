@@ -49,13 +49,72 @@ def get_user_by_id(user_id: str) -> User:
         return None if (user := cursor.fetchone()) == None else User(user[0], user[1], user[2])
 
 # Define method to add sensor to database
-def create_device(user_id: str, device_key: str, device_id: str, device_type: int, soil_type: int):
+def create_device(user_id: str, device_id: str, device_type: int, soil_type: int):
     with get_connection() as cnx:
         with cnx.cursor() as cursor:
-            sql = "INSERT INTO `devices` (`user_id`, `device_key`, `device_id`, `device_type`, `soil_threshold`, `soil_type`) VALUES (%(ui)s, %(dk)s, %(di)s, %(dt)s, %(t)s, %(st)s)"
-            cursor.execute(sql, args={'ui': int(user_id), 'dk': device_key, 'di': device_id, 'dt': device_type, 't': SOIL_VALUES[int(soil_type)], 'st': soil_type})
+            sql = "INSERT INTO `devices` (`user_id`, `thing_id`, `device_type`, `soil_threshold`, `soil_type`) VALUES (%(ui)s, %(di)s, %(dt)s, %(t)s, %(st)s)"
+            cursor.execute(sql, args={'ui': int(user_id), 'di': device_id, 'dt': device_type, 't': SOIL_VALUES[int(soil_type)], 'st': soil_type})
         
         cnx.commit()
+
+# Define method to add a hub to database
+def create_hub(user_id: int, thing_id: str, soil_type_1: int, soil_type_2: int):
+    with get_connection() as cnx:
+        with cnx.cursor() as cursor:
+            sql = "INSERT INTO `hubs` (`user_id`, `thing_id`, `soil_type_1`, `soil_type_2`, `threshold1`, `threshold2`) VALUES (%(ui)s, %(ti)s, %(s1)s, %(s2)s, %(t1)s, %(t2)s)"
+            cursor.execute(sql, args={'ui': user_id, 'ti': thing_id, 's1': soil_type_1, 's2': soil_type_2, 't1': SOIL_VALUES[soil_type_1], 't2': SOIL_VALUES[soil_type_2]})
+
+        cnx.commit()
+
+# Define method to add a sensor to database
+def create_sensor(thing_id: str, hub_id: int, zone: int):
+    with get_connection() as cnx:
+        with cnx.cursor() as cursor:
+            sql = "INSERT INTO `sensors` (`thing_id`, `hub_id`, `zone`) VALUES (%(ti)s, %(hi)s, %(z)s)"
+            cursor.execute(sql, args={'ti': thing_id, 'hi': hub_id, 'z': zone})
+
+        cnx.commit()
+
+# Define method to retrieve hubs from database
+def get_hubs_by_user(user_id: int):
+    from entities.devices import Hub
+    with get_connection().cursor() as cursor:
+        sql = "SELECT * FROM `hubs` WHERE `user_id` = %(id)s"
+        cursor.execute(sql, args={'id': int(user_id)})
+
+        devices = []
+
+        for device in cursor:
+            devices.append(Hub(device[0], device[1], device[4], device[5], device[2], device[6]))
+
+        return devices
+
+# Define method to get sensors by user
+def get_sensors_by_user(user_id: int):
+    from entities.devices import Sensor
+    
+    # Iterate over all hubs, return data in form of dict
+    data = {}
+
+    with get_connection().cursor() as cursor:
+        sql = "SELECT `sensors`.`id`, `sensors`.`thing_id`, `sensors`.`hub_id`, `sensors`.`zone` FROM `sensors` INNER JOIN `hubs` ON `sensors`.`hub_id` = `hubs`.`id` WHERE `hubs`.`user_id` = %(ui)s"
+        cursor.execute(sql, args={'ui': int(user_id)})
+
+        for sensor in cursor:
+            if data.get(sensor[2]) == None:
+                data[sensor[2]] = [Sensor(sensor[0], sensor[1], sensor[3])]
+            else:
+                data[sensor[2]].append(Sensor(sensor[0], sensor[1], sensor[3]))
+
+    parsed_data = {}
+
+    for hub in data:
+        zone1_sensors = [sensor for sensor in data[hub] if sensor.zone == 1]
+        zone2_sensors = [sensor for sensor in data[hub] if sensor.zone == 2]
+
+        parsed_data[hub] = {1: zone1_sensors, 2: zone2_sensors}
+
+    return parsed_data
 
 # Define method to get devices by user_id from database
 def get_devices_by_user(user_id: str): 
@@ -67,18 +126,18 @@ def get_devices_by_user(user_id: str):
         devices = {'sensor': [], 'hub': []}
 
         for device in cursor:
-            if device[4] == 0:      # Sensor
-                devices['sensor'].append(Sensor(device[0], device[2], device[3], device[5], device[6]))
-            else:                   # Hub
-                devices['hub'].append(Hub(device[0], device[2], device[3], device[5], device[6]))
+            if device[2] == 0:      # Sensor
+                devices['sensor'].append(Sensor(device[0], device[5], device[3], device[4]))
+            # else:                   # Hub
+                # devices['hub'].append(Hub(device[0], device[5], device[3], device[4]))
 
         return devices
 
-def update_device_threshold(device_id: int, threshold: int):
+def update_device_threshold(device_id: int, threshold: int, zone: int):
     with get_connection() as cnx:
         with cnx.cursor() as cursor:
-            sql = "UPDATE `devices` SET `soil_threshold` = %(t)s WHERE `id` = %(di)s"
-            cursor.execute(sql, args={'di': device_id, 't': threshold})
+            sql = f"UPDATE `hubs` SET `threshold{zone}` = {threshold} WHERE `id` = {device_id}"
+            cursor.execute(sql)
 
         cnx.commit()
 

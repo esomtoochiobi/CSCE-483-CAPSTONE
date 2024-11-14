@@ -1,5 +1,6 @@
 from bokeh.plotting import figure, save, output_file
-from db import create_device, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_devices_by_user, get_readings_for_device, update_device_threshold
+from client import get_soil_moisture_data, get_valve_data, update_valve_data
+from db import create_hub, create_sensor, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_sensors_by_user, get_hubs_by_user, get_readings_for_device, update_device_threshold
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
@@ -25,8 +26,8 @@ bcrypt = Bcrypt(app)
 @login_manager.user_loader
 def load_user(user_id):
     user = get_user_by_id(user_id)
-    user.devices = get_devices_by_user(user_id)
-    print(user.devices)
+    user.hubs = get_hubs_by_user(user_id)
+    user.sensors = get_sensors_by_user(user_id)
     return user
 
 # Routes
@@ -82,30 +83,24 @@ def logout():
 @app.route('/profile', methods=['GET', 'POST'])
 @flask_login.login_required
 def profile():
-    if request.method == 'POST':
-        device_key = request.form.get('device_key')
-        device_id = request.form.get('device_id')
-        device_type = request.form.get('device_type')
-        soil_type = request.form.get('soil_type')
+    print(flask_login.current_user.sensors)
+    moisture_data = get_soil_moisture_data(flask_login.current_user.sensors)
+    valve_data = get_valve_data(flask_login.current_user.hubs)
 
-        create_device(flask_login.current_user.id, device_key, device_id, device_type, soil_type)
-        return redirect(url_for('profile')) 
+    print(moisture_data)
 
-    for i in range(len(flask_login.current_user.devices['sensor'])):
-        device = flask_login.current_user.devices['sensor'][i]
-        device.start()
+    for hub in flask_login.current_user.hubs:
+        print(hub.thresholds)
+        # Handle zone 1
+        for sensor in flask_login.current_user.sensors[hub.id][1]:
+            if moisture_data[hub.id][1][sensor.id] < hub.thresholds[0]:
+                flash(f'Sensor_{sensor.id} is under threshold')
+        # Handle zone 2
+        for sensor in flask_login.current_user.sensors[hub.id][2]:
+            if moisture_data[hub.id][2][sensor.id] < hub.thresholds[1]:
+                flash(f'Sensor_{sensor.id} is under threshold')
 
-        # Flash error if device is under threshold
-        
-        reading = 0 if (value := device.read('moistureLevel')) == None else value
-
-        if reading < device.threshold:
-            flash(f'Sensor_{device.id} is under threshold')
-
-    for hub in flask_login.current_user.devices['hub']:
-        hub.start()
-
-    return render_template('profile.html', user=flask_login.current_user)
+    return render_template('profile.html', user=flask_login.current_user, data=moisture_data, valve_data=valve_data)
 
 # Unauthorized error handling
 @app.errorhandler(401)
@@ -134,13 +129,40 @@ def soil_graph():
 
     return render_template(f'graphs/soil_{flask_login.current_user.id}_graph.html')
 
+@app.route('/create_hub', methods=['GET', 'POST'])
+@flask_login.login_required
+def createhub():
+    if request.method == 'POST':
+        thing_id = request.form.get('thing_id')
+        soil_1 = int(request.form.get('soil_type_1'))
+        soil_2 = int(request.form.get('soil_type_2'))
+        create_hub(flask_login.current_user.id, thing_id, soil_1, soil_2)
+
+        return 'Please close this tab.'
+    else:
+        return(render_template('create_hub.html'))
+
+@app.route('/create_sensor', methods=['GET', 'POST'])
+@flask_login.login_required
+def createsensor():
+    if request.method == 'POST':
+        thing_id = request.form.get('thing_id')
+        hub_id = int(request.form.get('hub_id'))
+        zone = int(request.form.get('zone'))
+        create_sensor(thing_id, hub_id, zone)
+
+        return 'Please close this tab.'
+    else:
+        return(render_template('create_sensor.html', user=flask_login.current_user))   
+
 @app.route('/update_threshold', methods=['POST'])
 @flask_login.login_required
 def update_threshold():
     device_id = request.form.get('device_id')
     threshold = request.form.get('threshold')
+    zone = request.form.get('zone')
 
-    update_device_threshold(device_id, threshold)
+    update_device_threshold(device_id, threshold, zone)
 
     return redirect(url_for('profile'))
 
@@ -148,22 +170,18 @@ def update_threshold():
 @flask_login.login_required
 def update_valves():
     device_id = int(request.form.get('device_id'))
-    device = next(device for device in flask_login.current_user.devices['hub'] if device.id == device_id)
+    device = next(device for device in flask_login.current_user.hubs if device.id == device_id)
     
     valve1 = request.form.get('valve1') != None
     valve2 = request.form.get('valve2') != None
 
-    print(device.read('valve1'), device.read('valve2'))
+    valve_data = get_valve_data([device]) 
 
-    if valve1 ^ device.read('valve1'):
-        print('1')
-        device.client['valve1'] = valve1
+    if valve1 ^ valve_data[device.id][0]:
+        update_valve_data(device, 0, valve1)
 
-    if valve2 ^ device.read('valve2'):
-        print('2')
-        device.client['valve2'] = valve2
-
-    device.client.update()
+    if valve2 ^ valve_data[device.id][1]:
+        update_valve_data(device, 1, valve2)
 
     return redirect(url_for('profile'))
 

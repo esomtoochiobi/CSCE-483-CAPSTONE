@@ -44,116 +44,115 @@
         <h1 class="title">Profile</h1>
         <h2 class="subtitle">Howdy, {{ user.email }}</h2>
 
-        <!-- Define container to hold Device list -->
         <div class="container">
-            <h3 class="subtitle"><strong>Devices</strong></h3>
+            <h3 class="subtitle"><strong>Hubs</strong></h3>
+            {% if user.hubs == [] %}
+                No hubs connected.
+            {% else %}
+                {% for hub in user.hubs %}
+                <div class="container">
+                    <h4 class="subtitle">Hub_{{hub.id}}</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Zone Number</th>
+                                <th>Valve Status</th>
+                                <th>Zone Threshold</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <form action="/update_valves" method="post"></form>
+                                <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <div class="field">
+                                            <label class="switch is-rounded">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} name="valve1">
+                                                <span class="check"></span>
+                                                <span class="control-label">Close Valve?</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form action="/update_threshold" method="post" id="threshold_{{hub.id}}_1">
+                                            <input class="input" type="number" placeholder="Set threshold here..." value="{{hub.thresholds[0]}}"
+                                                name="threshold" />
+                                            <input type="hidden" name="device_id" value="{{hub.id}}">
+                                            <input type="hidden" name="zone" value="1">
+                                        </form>
+                                    </td>
+                                    <td><button class="button is-primary" type="submit" form="threshold_{{hub.id}}_1">Update Threshold</button></td>
+                                </tr>
+                                {% if user.sensors[hub.id][1] == [] %}
+                                    <tr>
+                                        <td>
+                                        No associated sensors for Zone 1.
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    {% for sensor in user.sensors[hub.id][1] %}
+                                    <tr>
+                                        <td>Sensor_{{sensor.id}}</td>
+                                        <td>{{data[hub.id][1][sensor.id]}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                <tr>
+                                    <td>2</td>
+                                    <td>
+                                        <div class="field">
+                                            <label class="switch is-rounded">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} name="valve2">
+                                                <span class="check"></span>
+                                                <span class="control-label">Close Valve?</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form action="/update_threshold" method="post" id="threshold_{{hub.id}}_2">
+                                            <input class="input" type="number" placeholder="Set threshold here..." value="{{hub.thresholds[1]}}"
+                                                name="threshold" />
+                                            <input type="hidden" name="device_id" value="{{hub.id}}">
+                                            <input type="hidden" name="zone" value="2">
+                                            
+                                        </form>
+                                    </td>
+                                    <td><button class="button is-primary" type="submit" form="threshold_{{hub.id}}_2">Update Threshold</button></td>
+                                </tr>
+                                {% if user.sensors[hub.id][2] == [] %}
+                                <tr>
+                                    <td>No associated sensors for Zone 2.</td>
+                                </tr>
+                                {% else %}
+                                {% for sensor in user.sensors[hub.id][2] %}
+                                <tr>
+                                    <td>Sensor_{{sensor.id}}</td>
+                                    <td>{{data[hub.id][2][sensor.id]}}</td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                                <tr>
+                                    <td>
+                                        <button class="button is-primary" type="submit">
+                                            Update Valves
+                                        </button>
+                                    </td>
+                                </tr>
+                            </form>
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
 
-            <!-- Sensor Table -->
-            <table class="table"> 
-				<thead>
-					<tr>
-						<th>Device Name</th>
-						<th>Reading</th>
-						<th>Within Threshold</th>
-						<th>Soil Moisture Threshold</th>
-					</tr>
-				</thead>	
-				<tbody>
-					{% if user.devices['sensor'] == [] %}
-					<tr>
-						<td>No devices available.</td>
-					</tr>
-					{% else %}
-						{% for device in user.devices['sensor'] %}
-						<tr>
-							<td>Sensor_{{device.id}}</td>	
-							<td>{{device.read('moistureLevel')}}</td>
-							<td>
-								{% if device.read('moistureLevel') < device.threshold %}
-								❌
-								{% else %} 
-								✅ 
-								{% endif %}
-							</td>
-							<td>
-								<form action="/update_threshold" method="post" id="threshold_{{device.id}}">
-									<input class="input" type="number" placeholder="Set threshold here..." 
-										value="{{device.threshold}}" name="threshold"/>
-									<input type="hidden" name="device_id" value="{{device.id}}">
-								</form>
-							</td>
-							<td>
-								<button class="button is-primary" type="submit" form="threshold_{{device.id}}">
-									Update Threshold
-								</button>
-							</td>
-                            <td>
-                                <form action="/delete_device" method="post">
-                                    <input type="hidden" name="device_id" value="{{device.id}}">
-                                    <button type="submit" class="delete"></button>
-                                </form>
-                            </td>
-						</tr>
-						{% endfor %}
-					{% endif %}
-				</tbody>
-            </table>
-
-            <!-- Hub Table -->
-			 <table class="table">
-				<thead>
-					<tr>
-						<th>Device Name</th>
-						<th>Water Flow 1</th>
-                        <th>Water Flow 2</th>
-						<th>Valve 1</th>
-						<th>Valve 2</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% if user.devices['hub'] == [] %}
-					<tr>
-						<td>No devices available.</td>
-					</tr>
-					{% else %}
-						{% for device in user.devices['hub'] %}
-						<tr>
-							<td>Hub_{{device.id}}</td>
-							<td>{{ 0 if device.read('waterFlow1') == None else device.read('waterFlow1')}}</td>
-							<td>{{ 0 if device.read('waterFlow2') == None else device.read('waterFlow2')}}</td>
-                            <form action="/update_valves" method="post">
-								<td>
-									<div class="field">
-										<label class="switch is-rounded">
-											<input type="checkbox" {{ 'checked' if device.read('valve1') else ''}} 
-                                                name="valve1">
-											<span class="check"></span>
-											<span class="control-label">Close Valve?</span>
-										</label>
-									</div>
-								</td>
-								<td>
-                                    <div class="field">
-                                        <label class="switch is-rounded">
-                                            <input type="checkbox" {{ 'checked' if device.read('valve2') else '' }} 
-                                                name="valve2">
-                                            <span class="check"></span>
-                                            <span class="control-label">Close Valve?</span>
-                                        </label>
-                                    </div>
-								</td>
-								<td>
-									<button class="button is-primary" type="submit">
-										Update Valves
-									</button>
-								</td>
-								<input type="hidden" name="device_id" value="{{device.id}}">
-							</form>
-						</tr>
-						{% endfor %}
-					{% endif %}
-				</tbody>
-			 </table>
+        <div class="container">
+            <form action="/create_hub" method="get" target="_blank">
+                <button class="button is-primary" type="submit">Add a Hub (+)</button>
+            </form>
+            <form action="/create_sensor" method="get" target="_blank">
+                <button type="submit" class="button is-primary">Add a Sensor (+)</button>
+            </form>
         </div>
     </section>
 
@@ -162,12 +161,6 @@
         <div class="container">
             <h3 class="subtitle"><strong>Add a Device</strong></h3>
             <form action="" method="post">
-                <div class="field">
-                    <label class="label" for="device_key">Device Key</label>
-                    <div class="control">
-                        <input class="input" name="device_key" type="text" placeholder="Enter device key...">
-                    </div>
-                </div>
                 <div class="field">
                     <label class="label" for="device_id">Device ID</label>
                     <div class="control">
