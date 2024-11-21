@@ -2,8 +2,6 @@ from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from os import access, getenv
 from dotenv import load_dotenv
-from db import get_devices_by_user
-
 import iot_api_client as iot
 from iot_api_client.configuration import Configuration
 from iot_api_client.api import PropertiesV2Api

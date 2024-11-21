@@ -116,22 +116,22 @@ def get_sensors_by_user(user_id: int):
 
     return parsed_data
 
-# Define method to get devices by user_id from database
-def get_devices_by_user(user_id: str): 
-    from entities.devices import Hub, Sensor
-    with get_connection().cursor() as cursor:
-        sql = "SELECT * FROM `devices` WHERE `user_id` = %(id)s"
-        cursor.execute(sql, args={'id': int(user_id)})
+# # Define method to get devices by user_id from database
+# def get_devices_by_user(user_id: str): 
+#     from entities.devices import Hub, Sensor
+#     with get_connection().cursor() as cursor:
+#         sql = "SELECT * FROM `devices` WHERE `user_id` = %(id)s"
+#         cursor.execute(sql, args={'id': int(user_id)})
 
-        devices = {'sensor': [], 'hub': []}
+#         devices = {'sensor': [], 'hub': []}
 
-        for device in cursor:
-            if device[2] == 0:      # Sensor
-                devices['sensor'].append(Sensor(device[0], device[5], device[3], device[4]))
-            # else:                   # Hub
-                # devices['hub'].append(Hub(device[0], device[5], device[3], device[4]))
+#         for device in cursor:
+#             if device[2] == 0:      # Sensor
+#                 devices['sensor'].append(Sensor(device[0], device[5], device[3], device[4]))
+#             # else:                   # Hub
+#                 # devices['hub'].append(Hub(device[0], device[5], device[3], device[4]))
 
-        return devices
+#         return devices
 
 def update_device_threshold(device_id: int, threshold: int, zone: int):
     with get_connection() as cnx:

@@ -61,15 +61,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <form action="/update_valves" method="post"></form>
+                            <form action="/update_valves" method="post" id="valves"></form>
                                 <tr>
                                     <td>1</td>
                                     <td>
                                         <div class="field">
                                             <label class="switch is-rounded">
-                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} name="valve1">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} name="valve1" form="valves">
                                                 <span class="check"></span>
-                                                <span class="control-label">Close Valve?</span>
+                                                <span class="control-label">Open Valve?</span>
                                             </label>
                                         </div>
                                     </td>
@@ -77,7 +77,6 @@
                                         <form action="/update_threshold" method="post" id="threshold_{{hub.id}}_1">
                                             <input class="input" type="number" placeholder="Set threshold here..." value="{{hub.thresholds[0]}}"
                                                 name="threshold" />
-                                            <input type="hidden" name="device_id" value="{{hub.id}}">
                                             <input type="hidden" name="zone" value="1">
                                         </form>
                                     </td>
@@ -102,9 +101,9 @@
                                     <td>
                                         <div class="field">
                                             <label class="switch is-rounded">
-                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} name="valve2">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} name="valve2" form="valves">
                                                 <span class="check"></span>
-                                                <span class="control-label">Close Valve?</span>
+                                                <span class="control-label">Open Valve?</span>
                                             </label>
                                         </div>
                                     </td>
@@ -133,9 +132,10 @@
                                 {% endif %}
                                 <tr>
                                     <td>
-                                        <button class="button is-primary" type="submit">
+                                        <button class="button is-primary" type="submit" form="valves">
                                             Update Valves
                                         </button>
+                                        <input type="hidden" name="device_id" value="{{hub.id}}" form="valves">
                                     </td>
                                 </tr>
                             </form>

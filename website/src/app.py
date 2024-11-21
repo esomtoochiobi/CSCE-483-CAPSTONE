@@ -1,14 +1,17 @@
 from bokeh.plotting import figure, save, output_file
 from client import get_soil_moisture_data, get_valve_data, update_valve_data
-from db import create_hub, create_sensor, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_sensors_by_user, get_hubs_by_user, get_readings_for_device, update_device_threshold
+from db import create_hub, create_sensor, create_reading, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_sensors_by_user, get_hubs_by_user, get_readings_for_device, update_device_threshold
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
+from flask_rq2 import RQ
 from entities.user import User
-import threading
+from redis import Redis
+from rq_scheduler import Scheduler
 
-import os
 import flask_login
+import os
+import time
 
 # Load env variables
 load_dotenv()
@@ -16,11 +19,18 @@ load_dotenv()
 # Create app and login manager
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
+app.config['REDIS_URL'] = 'redis://localhost:6379/0'
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
 bcrypt = Bcrypt(app)
+
+# Setup Flask-RQ2
+redis = Redis()
+rq = RQ(app, connection=redis)
+
+scheduler = Scheduler(connection=redis)
 
 # Set up way to load users into a session
 @login_manager.user_loader
@@ -29,6 +39,21 @@ def load_user(user_id):
     user.hubs = get_hubs_by_user(user_id)
     user.sensors = get_sensors_by_user(user_id)
     return user
+
+@rq.job
+def push_data_to_db(user_id):
+    print(f"Job executed at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    user = load_user(user_id)
+    moisture_data = get_soil_moisture_data(user.sensors)
+
+    for hub in user.hubs:
+        for sensor in user.sensors[hub.id][1]:
+            create_reading(sensor.id, moisture_data[hub.id][1][sensor.id])
+
+        for sensor in user.sensors[hub.id][2]:
+            create_reading(sensor.id, moisture_data[hub.id][2][sensor.id])
+
+    print(f"Job finished at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
 # Routes
 @app.route('/')
@@ -83,14 +108,10 @@ def logout():
 @app.route('/profile', methods=['GET', 'POST'])
 @flask_login.login_required
 def profile():
-    print(flask_login.current_user.sensors)
     moisture_data = get_soil_moisture_data(flask_login.current_user.sensors)
     valve_data = get_valve_data(flask_login.current_user.hubs)
 
-    print(moisture_data)
-
     for hub in flask_login.current_user.hubs:
-        print(hub.thresholds)
         # Handle zone 1
         for sensor in flask_login.current_user.sensors[hub.id][1]:
             if moisture_data[hub.id][1][sensor.id] < hub.thresholds[0]:
@@ -99,6 +120,8 @@ def profile():
         for sensor in flask_login.current_user.sensors[hub.id][2]:
             if moisture_data[hub.id][2][sensor.id] < hub.thresholds[1]:
                 flash(f'Sensor_{sensor.id} is under threshold')
+
+    scheduler.cron('*/1 * * * *', func=push_data_to_db, args=[flask_login.current_user.id])
 
     return render_template('profile.html', user=flask_login.current_user, data=moisture_data, valve_data=valve_data)
 
@@ -176,20 +199,16 @@ def update_valves():
     valve2 = request.form.get('valve2') != None
 
     valve_data = get_valve_data([device]) 
+    print(device_id)
+    print(valve_data)
+    print(valve1, valve2)
 
     if valve1 ^ valve_data[device.id][0]:
+        print('1')
         update_valve_data(device, 0, valve1)
 
     if valve2 ^ valve_data[device.id][1]:
+        print(2)
         update_valve_data(device, 1, valve2)
 
-    return redirect(url_for('profile'))
-
-@app.route('/delete_device', methods=['POST'])
-@flask_login.login_required
-def delete_device(): 
-    device_id = int(request.form.get('device_id'))
-    
-    delete_device_by_id(device_id)
-    
     return redirect(url_for('profile'))
