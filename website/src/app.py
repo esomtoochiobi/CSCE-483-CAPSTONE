@@ -1,5 +1,7 @@
 from bokeh.plotting import figure, save, output_file
+from bokeh.models import DatetimeTickFormatter
 from client import get_soil_moisture_data, get_valve_data, update_valve_data
+from datetime import timedelta
 from db import create_hub, create_sensor, create_reading, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_sensors_by_user, get_hubs_by_user, get_readings_for_device, update_device_threshold
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
@@ -130,7 +132,7 @@ def profile():
             schedule_job = False
 
     if schedule_job:
-        scheduler.cron('*/1 * * * *', func=push_data_to_db, args=[flask_login.current_user.id], meta={'id': flask_login.current_user.id})
+        scheduler.cron('*/5 * * * *', func=push_data_to_db, args=[flask_login.current_user.id], meta={'id': flask_login.current_user.id})
 
     return render_template('profile.html', user=flask_login.current_user, data=moisture_data, valve_data=valve_data)
 
@@ -145,17 +147,33 @@ def soil_graph():
     start_date = request.form.get('start').replace('T', ' ') + ':00'
     end_date = request.form.get('end').replace('T', ' ') + ':00'
 
-    readings = get_readings_for_device(5, start_date, end_date)
+    readings = {}
+
+    for i in range(1, 7):
+        readings[i] = get_readings_for_device(i, start_date, end_date)
+
+    print(readings[1][0].last_time)
 
     output_file(f'templates/graphs/soil_{flask_login.current_user.id}_graph.html')
 
-    plot = figure(title='Soil Moisture Plot', x_axis_label='Timestamps', y_axis_label='Soil Moisture (%)', x_range=[reading.last_time for reading in readings])
-    plot.vbar(x=[reading.last_time for reading in readings], top=list(reading.value for reading in readings), width=0.5, legend_label='Sensor_5')
+    plot = figure(title='Soil Moisture Plot', x_axis_label='Timestamps', y_axis_label='Soil Moisture (%)', x_axis_type='datetime', width=1000, height=750)
+    plot.vbar(x=[reading.last_time for reading in readings[1]], top=[reading.value for reading in readings[1]], width=10, legend_label='Sensor_1', color='blue')
+    plot.vbar(x=[reading.last_time+timedelta(seconds=5) for reading in readings[2]], top=[reading.value for reading in readings[2]], width=10, legend_label='Sensor_2', color='red')
+    plot.vbar(x=[reading.last_time+timedelta(seconds=10) for reading in readings[3]], top=[reading.value for reading in readings[3]], width=10, legend_label='Sensor_3', color='green')
+    plot.vbar(x=[reading.last_time+timedelta(seconds=15) for reading in readings[4]], top=[reading.value for reading in readings[4]], width=10, legend_label='Sensor_4', color='orange')
+    plot.vbar(x=[reading.last_time+timedelta(seconds=20) for reading in readings[5]], top=[reading.value for reading in readings[5]], width=10, legend_label='Sensor_5', color='pink')
+    plot.vbar(x=[reading.last_time+timedelta(seconds=25) for reading in readings[6]], top=[reading.value for reading in readings[6]], width=10, legend_label='Sensor_6', color='purple')
 
     plot.xgrid.grid_line_color = None
     plot.y_range.start = 0
 
     plot.xaxis.major_label_orientation = "vertical"
+
+    plot.xaxis.formatter = DatetimeTickFormatter(
+    hours="%b %d, %Y %H:%M",   # For example: Jan 01, 2024 08:30
+    minutes="%b %d, %Y %H:%M",  # For example: Jan 01, 2024 08:30
+    seconds="%b %d, %Y %H:%M:%S"  # For example: Jan 01, 2024 08:30:00
+)
 
     save(plot)
 
