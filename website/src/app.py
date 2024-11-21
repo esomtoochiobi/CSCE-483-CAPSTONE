@@ -120,8 +120,17 @@ def profile():
         for sensor in flask_login.current_user.sensors[hub.id][2]:
             if moisture_data[hub.id][2][sensor.id] < hub.thresholds[1]:
                 flash(f'Sensor_{sensor.id} is under threshold')
+    
+    listofjobs = scheduler.get_jobs()
+    schedule_job = True
 
-    scheduler.cron('*/1 * * * *', func=push_data_to_db, args=[flask_login.current_user.id])
+    for job in listofjobs:
+        if flask_login.current_user.id == job.meta['id']:
+            print('no schedule')
+            schedule_job = False
+
+    if schedule_job:
+        scheduler.cron('*/1 * * * *', func=push_data_to_db, args=[flask_login.current_user.id], meta={'id': flask_login.current_user.id})
 
     return render_template('profile.html', user=flask_login.current_user, data=moisture_data, valve_data=valve_data)
 
