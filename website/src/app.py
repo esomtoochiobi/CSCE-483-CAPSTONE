@@ -127,7 +127,7 @@ def profile():
             schedule_job = False
 
     if schedule_job:
-        scheduler.cron('*/1 * * * *', func=push_data_to_db, args=[flask_login.current_user.id], meta={'id': flask_login.current_user.id})
+        scheduler.cron('*/5 * * * *', func=push_data_to_db, args=[flask_login.current_user.id], meta={'id': flask_login.current_user.id})
 
     return render_template('profile.html', user=flask_login.current_user, data=moisture_data, valve_data=valve_data)
 
@@ -246,12 +246,13 @@ def update_valves():
     print(valve_data)
     print(valve1, valve2)
 
-    if valve1 ^ valve_data[device.id][0]:
-        print('1')
+    if valve1:
+        print(1)
         update_valve_data(device, 0, valve1)
-
-    if valve2 ^ valve_data[device.id][1]:
+    else:
         print(2)
         update_valve_data(device, 1, valve2)
+
+    time.sleep(1)
 
     return redirect(url_for('profile'))

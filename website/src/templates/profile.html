@@ -67,7 +67,7 @@
                                     <td>
                                         <div class="field">
                                             <label class="switch is-rounded">
-                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} name="valve1" form="valves">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} name="valve1" form="valves" id="valve1">
                                                 <span class="check"></span>
                                                 <span class="control-label">Open Valve?</span>
                                             </label>
@@ -101,7 +101,7 @@
                                     <td>
                                         <div class="field">
                                             <label class="switch is-rounded">
-                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} name="valve2" form="valves">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} name="valve2" form="valves" id="valve2">
                                                 <span class="check"></span>
                                                 <span class="control-label">Open Valve?</span>
                                             </label>
@@ -185,6 +185,40 @@
                 document.getElementById('alert_center').style.display = 'none';
             }
         }
+
+        // Get references to the valvees
+        const valve1 = document.getElementById('valve1');
+        const valve2 = document.getElementById('valve2');
+
+        // Add event listeners to each valve
+        valve1.addEventListener('change', function () {
+            if (valve1.checked) {
+                valve2.disabled = true;
+            } else {
+                valve2.disabled = false;
+            }
+        });
+
+        valve2.addEventListener('change', function () {
+            if (valve2.checked) {
+                valve1.disabled = true;
+            } else {
+                valve1.disabled = false;
+            }
+        });
+
+        // Prevent unchecked checkboxes from being clicked when disabled
+        valve1.addEventListener('click', function (e) {
+            if (valve1.disabled) {
+                e.preventDefault(); // Prevent action if the valve is disabled
+            }
+        });
+
+        valve2.addEventListener('click', function (e) {
+            if (valve2.disabled) {
+                e.preventDefault(); // Prevent action if the valve is disabled
+            }
+        });
     </script>
 </body>
 

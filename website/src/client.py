@@ -115,13 +115,11 @@ def update_valve_data(device, valve_bit, value):
 
     # Get valve variable
     try:
-        valve = next(variable for variable in api.properties_v2_list(device.device_id) 
-                    if variable.name == f'valve{valve_bit+1}')
-
-
-        api_response = api.properties_v2_publish(device.device_id, valve.id, {"value": value})
-        print(api_response)
-        
+        api_response = api.properties_v2_list(device.device_id)
+        mode = next(variable for variable in api_response
+                    if variable.name == 'mode')
+        res = api.properties_v2_publish(device.device_id, mode.id, {"value": f'{valve_bit+1} {1 if value else 3}'})
+        print(res)
     except ApiException as e:
         # Do nothing, as valve isn't updated
         print('valve not updated')
