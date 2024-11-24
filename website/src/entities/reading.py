@@ -5,4 +5,4 @@ class Reading():
         self.id = _id
         self.device_id = device_id
         self.value = reading
-        self.last_time = last_time.strftime('%Y-%m-%d %H:%M')
+        self.last_time = last_time

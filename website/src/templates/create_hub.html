@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="title">{% block title %}Create a Hub{% endblock %}</h1>
+<h2 class="subtitle">Add a hub</h2>
+<form action="" method="post">
+    <div class="field">
+        <label for="thing_id" class="label">Device ID</label>
+        <div class="control">
+            <input type="text" name="thing_id" class="input" placeholder="Enter device ID here...">
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Soil Type for Zone 1</label>
+        <div class="control">
+            <div class="select">
+                <select name="soil_type_1">
+                    <option value="0">Sandy</option>
+                    <option value="1">Loamy sand</option>
+                    <option value="2">Sandy loam</option>
+                    <option value="3">Loam</option>
+                    <option value="4">Silt loam</option>
+                    <option value="5">Sandy clay loam</option>
+                    <option value="6">Sandy clay</option>
+                    <option value="7">Clay loam</option>
+                    <option value="8">Silty clay loam</option>
+                    <option value="9">Silty clay</option>
+                    <option value="10">Clay</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">Soil Type for Zone 2</label>
+        <div class="control">
+            <div class="select">
+                <select name="soil_type_2">
+                    <option value="0">Sandy</option>
+                    <option value="1">Loamy sand</option>
+                    <option value="2">Sandy loam</option>
+                    <option value="3">Loam</option>
+                    <option value="4">Silt loam</option>
+                    <option value="5">Sandy clay loam</option>
+                    <option value="6">Sandy clay</option>
+                    <option value="7">Clay loam</option>
+                    <option value="8">Silty clay loam</option>
+                    <option value="9">Silty clay</option>
+                    <option value="10">Clay</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <button class="button is-primary" type="submit">Submit</button>
+</form>
+{% endblock %}
