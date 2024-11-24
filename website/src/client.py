@@ -31,13 +31,17 @@ def get_access_token():
 
     return token.get("access_token")
 
-def get_soil_moisture_data(device_list):
-    data = {}
-
+def get_properties_api():
     client_config = Configuration(host="https://api2.arduino.cc")
     client_config.access_token = get_access_token()
     client = iot.ApiClient(client_config)
     api = iot.PropertiesV2Api(client) 
+    return api
+
+def get_soil_moisture_data(device_list):
+    data = {}
+
+    api = get_properties_api()
 
     for hub in device_list:
         data[hub] = {1: {}, 2: {}}
@@ -74,10 +78,7 @@ def get_soil_moisture_data(device_list):
 def get_valve_data(device_list):
     data = {}
 
-    client_config = Configuration(host="https://api2.arduino.cc")
-    client_config.access_token = get_access_token()
-    client = iot.ApiClient(client_config)
-    api = iot.PropertiesV2Api(client) 
+    api = get_properties_api()
 
     for device in device_list:
         try:
@@ -95,10 +96,7 @@ def get_valve_data(device_list):
 def get_flow_data(device_list):
     data = {}
 
-    client_config = Configuration(host="https://api2.arduino.cc")
-    client_config.access_token = get_access_token()
-    client = iot.ApiClient(client_config)
-    api = iot.PropertiesV2Api(client) 
+    api = get_properties_api()
 
     for device in device_list:
         try:
@@ -113,10 +111,7 @@ def get_flow_data(device_list):
     return data
 
 def update_valve_data(device, valve_bit, value):
-    client_config = Configuration(host="https://api2.arduino.cc")
-    client_config.access_token = get_access_token()
-    client = iot.ApiClient(client_config)
-    api = iot.PropertiesV2Api(client) 
+    api = get_properties_api()
 
     # Get valve variable
     try:
