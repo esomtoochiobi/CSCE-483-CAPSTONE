@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from entities.flow import Flow
 from entities.user import User
 from entities.reading import Reading
 
@@ -149,12 +150,34 @@ def create_reading(device_id: str, reading: str):
 
         cnx.commit()
         
+def create_flows(flow_data: list):
+    with get_connection() as cnx:
+        with cnx.cursor() as cursor:
+            sql = "INSERT INTO `flows` (`hub_id`, `value`, `zone`) VALUES "
+
+            for hub_id in flow_data:
+                for i in range(len(flow_data[hub_id])):
+                    sql += f'({hub_id}, {flow_data[hub_id][i]}, {i+1}), '  
+
+            print(sql[:-2])
+
+            cursor.execute(sql[:-2])
+        
+        cnx.commit()
+
 def get_readings_for_device(device_id: int, start_date: str, end_date: str) -> list:
     with get_connection().cursor() as cursor:
         sql = 'SELECT * FROM `readings` WHERE `device_id` = %(di)s AND `last_time_updated` BETWEEN %(sd)s AND %(ed)s'
         cursor.execute(sql, args={'di': device_id, 'sd': start_date, 'ed': end_date})
 
         return [Reading(reading[0], reading[1], reading[2], reading[3]) for reading in cursor]
+
+def get_flows_for_hub(hub_id: int, start_date: str, end_date: str) -> list:
+    with get_connection().cursor() as cursor:
+        sql = 'SELECT * FROM `flows` WHERE `hub_id` = %(hi)s and `time_created` BETWEEN %(sd)s AND %(ed)s'
+        cursor.execute(sql, args={'hi': hub_id, 'sd': start_date, 'ed': end_date})
+
+        return [Flow(flow[0], flow[1], flow[2], flow[3], flow[4]) for flow in cursor]
     
 def delete_device_by_id(device_id:int):
     with get_connection() as cnx:

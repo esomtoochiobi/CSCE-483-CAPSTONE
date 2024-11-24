@@ -92,6 +92,26 @@ def get_valve_data(device_list):
 
     return data
 
+def get_flow_data(device_list):
+    data = {}
+
+    client_config = Configuration(host="https://api2.arduino.cc")
+    client_config.access_token = get_access_token()
+    client = iot.ApiClient(client_config)
+    api = iot.PropertiesV2Api(client) 
+
+    for device in device_list:
+        try:
+            # list properties_v2
+            api_response = api.properties_v2_list(device.device_id)
+            flows = [variable for variable in api_response if 'Flow' in variable.name]
+            data[device.id] = [flows[0].last_value, flows[1].last_value]
+        except ApiException as e:
+            print("Exception when calling PropertiesV2Api->propertiesV2List: %s\n" % e)
+            data[device.id] = [-1, -1]
+
+    return data
+
 def update_valve_data(device, valve_bit, value):
     client_config = Configuration(host="https://api2.arduino.cc")
     client_config.access_token = get_access_token()

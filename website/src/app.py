@@ -1,8 +1,8 @@
 from bokeh.plotting import figure, save, output_file
 from bokeh.models import DatetimeTickFormatter
-from client import get_soil_moisture_data, get_valve_data, update_valve_data
+from client import get_flow_data, get_soil_moisture_data, get_valve_data, update_valve_data
 from datetime import timedelta
-from db import create_hub, create_sensor, create_reading, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_sensors_by_user, get_hubs_by_user, get_readings_for_device, update_device_threshold
+from db import create_hub, create_sensor, create_flows, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_sensors_by_user, get_hubs_by_user, get_readings_for_device, get_flows_for_hub, update_device_threshold
 from dotenv import load_dotenv
 from flask import flash, Flask, request, render_template, redirect, url_for
 from flask_bcrypt import Bcrypt
@@ -46,14 +46,9 @@ def load_user(user_id):
 def push_data_to_db(user_id):
     print(f"Job executed at {time.strftime('%Y-%m-%d %H:%M:%S')}")
     user = load_user(user_id)
-    moisture_data = get_soil_moisture_data(user.sensors)
+    flow_data = get_flow_data(user.hubs)
 
-    for hub in user.hubs:
-        for sensor in user.sensors[hub.id][1]:
-            create_reading(sensor.id, moisture_data[hub.id][1][sensor.id])
-
-        for sensor in user.sensors[hub.id][2]:
-            create_reading(sensor.id, moisture_data[hub.id][2][sensor.id])
+    create_flows(flow_data)  
 
     print(f"Job finished at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
@@ -132,7 +127,7 @@ def profile():
             schedule_job = False
 
     if schedule_job:
-        scheduler.cron('*/5 * * * *', func=push_data_to_db, args=[flask_login.current_user.id], meta={'id': flask_login.current_user.id})
+        scheduler.cron('*/1 * * * *', func=push_data_to_db, args=[flask_login.current_user.id], meta={'id': flask_login.current_user.id})
 
     return render_template('profile.html', user=flask_login.current_user, data=moisture_data, valve_data=valve_data)
 
@@ -152,8 +147,6 @@ def soil_graph():
     for i in range(1, 7):
         readings[i] = get_readings_for_device(i, start_date, end_date)
 
-    print(readings[1][0].last_time)
-
     output_file(f'templates/graphs/soil_{flask_login.current_user.id}_graph.html')
 
     plot = figure(title='Soil Moisture Plot', x_axis_label='Timestamps', y_axis_label='Soil Moisture (%)', x_axis_type='datetime', width=1000, height=750)
@@ -166,18 +159,41 @@ def soil_graph():
 
     plot.xgrid.grid_line_color = None
     plot.y_range.start = 0
-
     plot.xaxis.major_label_orientation = "vertical"
-
     plot.xaxis.formatter = DatetimeTickFormatter(
-    hours="%b %d, %Y %H:%M",   # For example: Jan 01, 2024 08:30
-    minutes="%b %d, %Y %H:%M",  # For example: Jan 01, 2024 08:30
-    seconds="%b %d, %Y %H:%M:%S"  # For example: Jan 01, 2024 08:30:00
-)
+        hours="%b %d, %Y %H:%M",   # For example: Jan 01, 2024 08:30
+        minutes="%b %d, %Y %H:%M",  # For example: Jan 01, 2024 08:30
+        seconds="%b %d, %Y %H:%M:%S"  # For example: Jan 01, 2024 08:30:00
+    )
 
     save(plot)
-
     return render_template(f'graphs/soil_{flask_login.current_user.id}_graph.html')
+
+@app.route('/flow_graph', methods=['POST'])
+@flask_login.login_required
+def flow_graph():
+    start_date = request.form.get('start').replace('T', ' ') + ':00'
+    end_date = request.form.get('end').replace('T', ' ') + ':00'
+
+    flows = get_flows_for_hub(1, start_date, end_date)
+
+    output_file(f'templates/graphs/flow_{flask_login.current_user.id}_graph.html')
+
+    plot = figure(title='Water Usage Plot', x_axis_label='Timestamps', y_axis_label='Total Water Used (mL)', x_axis_type='datetime', width=1000, height=750)
+    plot.vbar(x=[flow.last_time for flow in flows if flow.zone == 1], top=[flow.value for flow in flows if flow.zone == 1], width=50, legend_label='Zone 1', color='blue')
+    plot.vbar(x=[flow.last_time+timedelta(seconds=5) for flow in flows if flow.zone == 2], top=[flow.value for flow in flows if flow.zone == 2], width=50, legend_label='Zone 2', color='red')
+
+    plot.xgrid.grid_line_color = None
+    plot.y_range.start = 0
+    plot.xaxis.major_label_orientation = "vertical"
+    plot.xaxis.formatter = DatetimeTickFormatter(
+        hours="%b %d, %Y %H:%M",   # For example: Jan 01, 2024 08:30
+        minutes="%b %d, %Y %H:%M",  # For example: Jan 01, 2024 08:30
+        seconds="%b %d, %Y %H:%M:%S"  # For example: Jan 01, 2024 08:30:00
+    )
+
+    save(plot)
+    return render_template(f'graphs/flow_{flask_login.current_user.id}_graph.html')
 
 @app.route('/create_hub', methods=['GET', 'POST'])
 @flask_login.login_required

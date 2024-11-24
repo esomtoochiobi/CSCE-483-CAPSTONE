@@ -156,58 +156,11 @@
         </div>
     </section>
 
-    <!-- Define form to add a device -->
-    <section class="section">
-        <div class="container">
-            <h3 class="subtitle"><strong>Add a Device</strong></h3>
-            <form action="" method="post">
-                <div class="field">
-                    <label class="label" for="device_id">Device ID</label>
-                    <div class="control">
-                        <input class="input" name="device_id" type="text" placeholder="Enter device ID...">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Device Type</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="device_type">
-                                <option value="0">Sensor</option>
-                                <option value="1">Hub</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Soil Type</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="soil_type">
-                                <option value="0">Sandy</option>
-                                <option value="1">Loamy sand</option>
-                                <option value="2">Sandy loam</option>
-                                <option value="3">Loam</option>
-                                <option value="4">Silt loam</option>
-                                <option value="5">Sandy clay loam</option>
-                                <option value="6">Sandy clay</option>
-                                <option value="7">Clay loam</option>
-                                <option value="8">Silty clay loam</option>
-                                <option value="9">Silty clay</option>
-                                <option value="10">Clay</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <button class="button is-primary" type="submit">Submit</button>
-            </form>
-        </div>
-    </section>
-
 	<!-- Define component to show soil moisture data -->
     <section class="section">
         <div class="container">
-            <h3 class="subtitle"><strong>View Soil Moisture Levels</strong></h3>
-            <form action="/soil_graph" method="post" target="_blank" >
+            <h3 class="subtitle"><strong>View Water Usage over Time</strong></h3>
+            <form action="/flow_graph" method="post" target="_blank" >
                 <div class="field">
                     <label class="label">Start Date</label>
                     <input type="datetime-local" name="start" 
