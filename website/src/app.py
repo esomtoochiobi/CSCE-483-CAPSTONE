@@ -1,6 +1,6 @@
-from bokeh.plotting import figure, save, output_file
+from bokeh.plotting import figure, save, show, output_file
 from bokeh.models import DatetimeTickFormatter
-from client import get_flow_data, get_soil_moisture_data, get_valve_data, update_valve_data
+from client import get_flow_data, get_soil_moisture_data, get_valve_data, update_cloud_threshold, update_valve_data
 from datetime import timedelta
 from db import create_hub, create_sensor, create_flows, create_user, delete_device_by_id, get_user_by_id, get_user_by_email, get_sensors_by_user, get_hubs_by_user, get_readings_for_device, get_flows_for_hub, update_device_threshold
 from dotenv import load_dotenv
@@ -192,8 +192,8 @@ def flow_graph():
         seconds="%b %d, %Y %H:%M:%S"  # For example: Jan 01, 2024 08:30:00
     )
 
-    save(plot)
-    return render_template(f'graphs/flow_{flask_login.current_user.id}_graph.html')
+    show(plot)
+    return redirect(url_for('profile'))
 
 @app.route('/create_hub', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -224,10 +224,13 @@ def createsensor():
 @app.route('/update_threshold', methods=['POST'])
 @flask_login.login_required
 def update_threshold():
-    device_id = request.form.get('device_id')
-    threshold = request.form.get('threshold')
+    device_id = int(request.form.get('device_id'))
+    threshold = int(request.form.get('threshold'))
     zone = request.form.get('zone')
+    
+    device = next(device for device in flask_login.current_user.hubs if device.id == device_id)
 
+    update_cloud_threshold(device, zone, threshold)
     update_device_threshold(device_id, threshold, zone)
 
     return redirect(url_for('profile'))
@@ -246,12 +249,25 @@ def update_valves():
     print(valve_data)
     print(valve1, valve2)
 
-    if valve1:
+    if valve1 ^ valve_data[device_id][0]:
         print(1)
         update_valve_data(device, 0, valve1)
-    else:
+    
+    if valve2 ^ valve_data[device_id][1]:
         print(2)
         update_valve_data(device, 1, valve2)
+
+    time.sleep(1)
+
+    return redirect(url_for('profile'))
+
+@app.route('/make_autonomous', methods=['POST'])
+@flask_login.login_required
+def make_autonomous():
+    device_id = int(request.form.get('device_id'))
+    device = next(device for device in flask_login.current_user.hubs if device.id == device_id)
+
+    update_valve_data(device, -1, True)
 
     time.sleep(1)
 

@@ -118,8 +118,22 @@ def update_valve_data(device, valve_bit, value):
         api_response = api.properties_v2_list(device.device_id)
         mode = next(variable for variable in api_response
                     if variable.name == 'mode')
-        res = api.properties_v2_publish(device.device_id, mode.id, {"value": f'{valve_bit+1} {1 if value else 3}'})
+        mode_value = f'{valve_bit+1} {1 if value else 3}' if valve_bit != -1 else '+'
+        res = api.properties_v2_publish(device.device_id, mode.id, {"value": mode_value})
         print(res)
     except ApiException as e:
         # Do nothing, as valve isn't updated
         print('valve not updated')
+
+def update_cloud_threshold(device, threshold, value):
+    api = get_properties_api() 
+
+    try:
+        api_response = api.properties_v2_list(device.device_id)
+        cloud_thres = next(variable for variable in api_response
+                    if variable.name == f'threshold{threshold}')
+        res = api.properties_v2_publish(device.device_id, cloud_thres.id, {"value": value})
+        print(res)
+    except ApiException as e:
+        # Do nothing, as valve isn't updated
+        print('valve not updated') 

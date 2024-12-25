@@ -174,7 +174,7 @@ def get_readings_for_device(device_id: int, start_date: str, end_date: str) -> l
 
 def get_flows_for_hub(hub_id: int, start_date: str, end_date: str) -> list:
     with get_connection().cursor() as cursor:
-        sql = 'SELECT * FROM `flows` WHERE `hub_id` = %(hi)s and `time_created` BETWEEN %(sd)s AND %(ed)s'
+        sql = f'SELECT * FROM `flows` WHERE `hub_id` = {hub_id} and `time_created` BETWEEN \'{start_date}\' AND \'{end_date}\''
         cursor.execute(sql, args={'hi': hub_id, 'sd': start_date, 'ed': end_date})
 
         return [Flow(flow[0], flow[1], flow[2], flow[3], flow[4]) for flow in cursor]

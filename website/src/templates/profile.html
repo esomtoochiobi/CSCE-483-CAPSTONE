@@ -67,7 +67,7 @@
                                     <td>
                                         <div class="field">
                                             <label class="switch is-rounded">
-                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} name="valve1" form="valves" id="valve1">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} {{ 'disabled' if valve_data[hub.id][1] else '' }} name="valve1" form="valves" id="valve1">
                                                 <span class="check"></span>
                                                 <span class="control-label">Open Valve?</span>
                                             </label>
@@ -77,6 +77,7 @@
                                         <form action="/update_threshold" method="post" id="threshold_{{hub.id}}_1">
                                             <input class="input" type="number" placeholder="Set threshold here..." value="{{hub.thresholds[0]}}"
                                                 name="threshold" />
+                                            <input type="hidden" name="device_id" value="{{hub.id}}">
                                             <input type="hidden" name="zone" value="1">
                                         </form>
                                     </td>
@@ -101,7 +102,7 @@
                                     <td>
                                         <div class="field">
                                             <label class="switch is-rounded">
-                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} name="valve2" form="valves" id="valve2">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} {{ 'disabled' if valve_data[hub.id][0] else '' }} name="valve2" form="valves" id="valve2">
                                                 <span class="check"></span>
                                                 <span class="control-label">Open Valve?</span>
                                             </label>
@@ -137,6 +138,12 @@
                                         </button>
                                         <input type="hidden" name="device_id" value="{{hub.id}}" form="valves">
                                     </td>
+                                    <td>
+                                        <form action="make_autonomous" method="post" id="autonomous_{{hub.id}}">
+                                            <button class="button is-primary" type="submit" form="autonomous_{{hub.id}}">Make Auto</button>
+                                            <input type="hidden" name="device_id" value="{{hub.id}}" form="autonomous_{{hub.id}}">
+                                        </form>
+                                    </td>
                                 </tr>
                             </form>
                         </tbody>
@@ -160,7 +167,7 @@
     <section class="section">
         <div class="container">
             <h3 class="subtitle"><strong>View Water Usage over Time</strong></h3>
-            <form action="/flow_graph" method="post" target="_blank" >
+            <form action="/flow_graph" method="post" target="" >
                 <div class="field">
                     <label class="label">Start Date</label>
                     <input type="datetime-local" name="start" 
@@ -190,22 +197,24 @@
         const valve1 = document.getElementById('valve1');
         const valve2 = document.getElementById('valve2');
 
-        // Add event listeners to each valve
-        valve1.addEventListener('change', function () {
+        function updateValveState() {
             if (valve1.checked) {
                 valve2.disabled = true;
             } else {
                 valve2.disabled = false;
             }
-        });
 
-        valve2.addEventListener('change', function () {
             if (valve2.checked) {
                 valve1.disabled = true;
             } else {
                 valve1.disabled = false;
             }
-        });
+        }
+
+        // Add event listeners to each valve
+        valve1.addEventListener('change', updateValveState);
+
+        valve2.addEventListener('change', updateValveState);
 
         // Prevent unchecked checkboxes from being clicked when disabled
         valve1.addEventListener('click', function (e) {
