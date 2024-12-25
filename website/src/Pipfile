@@ -22,6 +22,12 @@ pyserial = "*"
 arduino-iot-cloud = "*"
 swig = "*"
 bokeh = "*"
+arduino-iot-client = "*"
+requests-oauthlib = "*"
+flask-rq2 = "*"
+rq-scheduler = "*"
+rq = "*"
+redis = "*"
 
 [dev-packages]
 

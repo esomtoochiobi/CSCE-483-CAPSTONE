@@ -5,3 +5,7 @@
     > pipenv install
 3. Run Flask app
     > pipenv run flask run
+4. In three seperate terminals, run one command.
+    > redis-server
+    > pipenv run rq worker
+    > pipenv run rqscheduler

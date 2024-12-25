@@ -44,162 +44,121 @@
         <h1 class="title">Profile</h1>
         <h2 class="subtitle">Howdy, {{ user.email }}</h2>
 
-        <!-- Define container to hold Device list -->
         <div class="container">
-            <h3 class="subtitle"><strong>Devices</strong></h3>
-
-            <!-- Sensor Table -->
-            <table class="table"> 
-				<thead>
-					<tr>
-						<th>Device Name</th>
-						<th>Reading</th>
-						<th>Within Threshold</th>
-						<th>Soil Moisture Threshold</th>
-					</tr>
-				</thead>	
-				<tbody>
-					{% if user.devices['sensor'] == [] %}
-					<tr>
-						<td>No devices available.</td>
-					</tr>
-					{% else %}
-						{% for device in user.devices['sensor'] %}
-						<tr>
-							<td>Sensor_{{device.id}}</td>	
-							<td>{{device.read('moistureLevel')}}</td>
-							<td>
-								{% if device.read('moistureLevel') < device.threshold %}
-								❌
-								{% else %} 
-								✅ 
-								{% endif %}
-							</td>
-							<td>
-								<form action="/update_threshold" method="post" id="threshold_{{device.id}}">
-									<input class="input" type="number" placeholder="Set threshold here..." 
-										value="{{device.threshold}}" name="threshold"/>
-									<input type="hidden" name="device_id" value="{{device.id}}">
-								</form>
-							</td>
-							<td>
-								<button class="button is-primary" type="submit" form="threshold_{{device.id}}">
-									Update Threshold
-								</button>
-							</td>
-						</tr>
-						{% endfor %}
-					{% endif %}
-				</tbody>
-            </table>
-
-            <!-- Hub Table -->
-			 <table class="table">
-				<thead>
-					<tr>
-						<th>Device Name</th>
-						<th>Water Flow 1</th>
-                        <th>Water Flow 2</th>
-						<th>Valve 1</th>
-						<th>Valve 2</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% if user.devices['hub'] == [] %}
-					<tr>
-						<td>No devices available.</td>
-					</tr>
-					{% else %}
-						{% for device in user.devices['hub'] %}
-						<tr>
-							<td>Hub_{{device.id}}</td>
-							<td>{{ 0 if device.read('waterFlow1') == None else device.read('waterFlow1')}}</td>
-							<td>{{ 0 if device.read('waterFlow2') == None else device.read('waterFlow2')}}</td>
-                            <form action="/update_valves" method="post">
-								<td>
-									<div class="field">
-										<label class="switch is-rounded">
-											<input type="checkbox" {{ 'checked' if device.read('valve1') else ''}} 
-                                                name="valve1">
-											<span class="check"></span>
-											<span class="control-label">Close Valve?</span>
-										</label>
-									</div>
-								</td>
-								<td>
-                                    <div class="field">
-                                        <label class="switch is-rounded">
-                                            <input type="checkbox" {{ 'checked' if device.read('valve2') else '' }} 
-                                                name="valve2">
-                                            <span class="check"></span>
-                                            <span class="control-label">Close Valve?</span>
-                                        </label>
-                                    </div>
-								</td>
-								<td>
-									<button class="button is-primary" type="submit">
-										Update Valves
-									</button>
-								</td>
-								<input type="hidden" name="device_id" value="{{device.id}}">
-							</form>
-						</tr>
-						{% endfor %}
-					{% endif %}
-				</tbody>
-			 </table>
+            <h3 class="subtitle"><strong>Hubs</strong></h3>
+            {% if user.hubs == [] %}
+                No hubs connected.
+            {% else %}
+                {% for hub in user.hubs %}
+                <div class="container">
+                    <h4 class="subtitle">Hub_{{hub.id}}</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Zone Number</th>
+                                <th>Valve Status</th>
+                                <th>Zone Threshold</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <form action="/update_valves" method="post" id="valves"></form>
+                                <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <div class="field">
+                                            <label class="switch is-rounded">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][0] else '' }} {{ 'disabled' if valve_data[hub.id][1] else '' }} name="valve1" form="valves" id="valve1">
+                                                <span class="check"></span>
+                                                <span class="control-label">Open Valve?</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form action="/update_threshold" method="post" id="threshold_{{hub.id}}_1">
+                                            <input class="input" type="number" placeholder="Set threshold here..." value="{{hub.thresholds[0]}}"
+                                                name="threshold" />
+                                            <input type="hidden" name="device_id" value="{{hub.id}}">
+                                            <input type="hidden" name="zone" value="1">
+                                        </form>
+                                    </td>
+                                    <td><button class="button is-primary" type="submit" form="threshold_{{hub.id}}_1">Update Threshold</button></td>
+                                </tr>
+                                {% if user.sensors[hub.id][1] == [] %}
+                                    <tr>
+                                        <td>
+                                        No associated sensors for Zone 1.
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    {% for sensor in user.sensors[hub.id][1] %}
+                                    <tr>
+                                        <td>Sensor_{{sensor.id}}</td>
+                                        <td>{{data[hub.id][1][sensor.id]}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                <tr>
+                                    <td>2</td>
+                                    <td>
+                                        <div class="field">
+                                            <label class="switch is-rounded">
+                                                <input type="checkbox" {{ 'checked' if valve_data[hub.id][1] else '' }} {{ 'disabled' if valve_data[hub.id][0] else '' }} name="valve2" form="valves" id="valve2">
+                                                <span class="check"></span>
+                                                <span class="control-label">Open Valve?</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form action="/update_threshold" method="post" id="threshold_{{hub.id}}_2">
+                                            <input class="input" type="number" placeholder="Set threshold here..." value="{{hub.thresholds[1]}}"
+                                                name="threshold" />
+                                            <input type="hidden" name="device_id" value="{{hub.id}}">
+                                            <input type="hidden" name="zone" value="2">
+                                            
+                                        </form>
+                                    </td>
+                                    <td><button class="button is-primary" type="submit" form="threshold_{{hub.id}}_2">Update Threshold</button></td>
+                                </tr>
+                                {% if user.sensors[hub.id][2] == [] %}
+                                <tr>
+                                    <td>No associated sensors for Zone 2.</td>
+                                </tr>
+                                {% else %}
+                                {% for sensor in user.sensors[hub.id][2] %}
+                                <tr>
+                                    <td>Sensor_{{sensor.id}}</td>
+                                    <td>{{data[hub.id][2][sensor.id]}}</td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                                <tr>
+                                    <td>
+                                        <button class="button is-primary" type="submit" form="valves">
+                                            Update Valves
+                                        </button>
+                                        <input type="hidden" name="device_id" value="{{hub.id}}" form="valves">
+                                    </td>
+                                    <td>
+                                        <form action="make_autonomous" method="post" id="autonomous_{{hub.id}}">
+                                            <button class="button is-primary" type="submit" form="autonomous_{{hub.id}}">Make Auto</button>
+                                            <input type="hidden" name="device_id" value="{{hub.id}}" form="autonomous_{{hub.id}}">
+                                        </form>
+                                    </td>
+                                </tr>
+                            </form>
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            {% endif %}
         </div>
-    </section>
 
-    <!-- Define form to add a device -->
-    <section class="section">
         <div class="container">
-            <h3 class="subtitle"><strong>Add a Device</strong></h3>
-            <form action="" method="post">
-                <div class="field">
-                    <label class="label" for="device_key">Device Key</label>
-                    <div class="control">
-                        <input class="input" name="device_key" type="text" placeholder="Enter device key...">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label" for="device_id">Device ID</label>
-                    <div class="control">
-                        <input class="input" name="device_id" type="text" placeholder="Enter device ID...">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Device Type</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="device_type">
-                                <option value="0">Sensor</option>
-                                <option value="1">Hub</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Soil Type</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="soil_type">
-                                <option value="0">Sandy</option>
-                                <option value="1">Loamy sand</option>
-                                <option value="2">Sandy loam</option>
-                                <option value="3">Loam</option>
-                                <option value="4">Silt loam</option>
-                                <option value="5">Sandy clay loam</option>
-                                <option value="6">Sandy clay</option>
-                                <option value="7">Clay loam</option>
-                                <option value="8">Silty clay loam</option>
-                                <option value="9">Silty clay</option>
-                                <option value="10">Clay</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <button class="button is-primary" type="submit">Submit</button>
+            <form action="/create_hub" method="get" target="_blank">
+                <button class="button is-primary" type="submit">Add a Hub (+)</button>
+            </form>
+            <form action="/create_sensor" method="get" target="_blank">
+                <button type="submit" class="button is-primary">Add a Sensor (+)</button>
             </form>
         </div>
     </section>
@@ -207,8 +166,8 @@
 	<!-- Define component to show soil moisture data -->
     <section class="section">
         <div class="container">
-            <h3 class="subtitle"><strong>View Soil Moisture Levels</strong></h3>
-            <form action="/soil_graph" method="post" target="_blank" >
+            <h3 class="subtitle"><strong>View Water Usage over Time</strong></h3>
+            <form action="/flow_graph" method="post" target="" >
                 <div class="field">
                     <label class="label">Start Date</label>
                     <input type="datetime-local" name="start" 
@@ -233,6 +192,42 @@
                 document.getElementById('alert_center').style.display = 'none';
             }
         }
+
+        // Get references to the valvees
+        const valve1 = document.getElementById('valve1');
+        const valve2 = document.getElementById('valve2');
+
+        function updateValveState() {
+            if (valve1.checked) {
+                valve2.disabled = true;
+            } else {
+                valve2.disabled = false;
+            }
+
+            if (valve2.checked) {
+                valve1.disabled = true;
+            } else {
+                valve1.disabled = false;
+            }
+        }
+
+        // Add event listeners to each valve
+        valve1.addEventListener('change', updateValveState);
+
+        valve2.addEventListener('change', updateValveState);
+
+        // Prevent unchecked checkboxes from being clicked when disabled
+        valve1.addEventListener('click', function (e) {
+            if (valve1.disabled) {
+                e.preventDefault(); // Prevent action if the valve is disabled
+            }
+        });
+
+        valve2.addEventListener('click', function (e) {
+            if (valve2.disabled) {
+                e.preventDefault(); // Prevent action if the valve is disabled
+            }
+        });
     </script>
 </body>
 
